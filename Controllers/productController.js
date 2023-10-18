@@ -1,3 +1,4 @@
+const { validationResult } = require("express-validator");
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
 const Product = require("../Models/ProductModel");
 const { NotFoundError } = require("../Utilities/CustomErrors");
@@ -33,6 +34,11 @@ exp.GetProudctById = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.UpdateProduct = RouterAsncErrorHandler(async (req, res, next) => {
     const { prodId } = req.query;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
     try {
         const updated = await Product.findByIdAndUpdate(prodId, req.body);
         return res.status(200).json({
@@ -45,16 +51,21 @@ exp.UpdateProduct = RouterAsncErrorHandler(async (req, res, next) => {
     }
 })
 
-exp.AddProduct = RouterAsncErrorHandler(async(req, res, next)=> {
-    try{
-        const newProd=new Product(req.body);
-        newProd.save();
+exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    try {
+        const newProd = new Product(req.body);
+        await newProd.save();
         return res.status(201).json({
-            message:"Product added",
+            message: "Product added",
             newProd,
         })
     }
-    catch(error){
+    catch (error) {
         next(error);
     }
 })
