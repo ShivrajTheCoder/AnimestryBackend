@@ -12,6 +12,8 @@ const PORT=process.env.PORT;
 
 const productRouter=require("./Routes/productRoutes");
 const orderRouter=require("./Routes/orderRoutes");
+const userRouter=require("./Routes/userRoutes");
+
 main().catch(err => console.log(err));
 async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/animestry')
@@ -36,6 +38,7 @@ app.use(ErrorHandlerMiddleware)
 
 app.use("/products",jsonParser,productRouter);
 app.use("/orders",jsonParser,orderRouter);
+app.use("/user",jsonParser,userRouter);
 app.listen(PORT,()=>{
     console.log("listening on port "+PORT);
 })
