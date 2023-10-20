@@ -1,6 +1,6 @@
 const express = require("express");
 const { check, body } = require("express-validator");
-const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct } = require("../Controllers/productController");
+const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory } = require("../Controllers/productController");
 const { CustomError } = require("../Utilities/CustomErrors");
 const router = express.Router();
 
@@ -14,24 +14,32 @@ router.route("/getprodbyid/:prodId")
 
 
 const atleastone = (value, { req }) => {
-    if (req.name || req.category || req.price || req.description) {
+
+    if (value.name || value.category ||value.price || value.description || value.anime) {
         return true;
     }
     throw new CustomError(400, "Invalid Parameters", "Invalid")
 }
 router.route("/updateprod/:prodId")
     .put([
-        body("name").optional().isString(),
+        body("name").optional(),
+        body("anime").optional(),
         body("category").optional().isMongoId(),
         body("price").optional().isNumeric(),
-        body("description").optional(), isString(),
+        body("description").optional(),
         body().custom(atleastone)
     ], UpdateProduct)
 
-router.route("/addprod").post([
-    body("name").exists().isString(),
+router.route("/addproduct").post([
+    body("name").exists(),
+    body("anime").exists(),
     body("category").exists().isMongoId(),
     body("price").exists().isNumeric(),
-    body("description").exists().isString(),
+    body("description").exists(),
 ], AddProduct)
+
+router.route("/addnewcategory").post([
+    body("name").exists(),
+],AddNewCategory)
+
 module.exports = router;

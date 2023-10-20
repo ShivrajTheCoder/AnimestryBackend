@@ -8,6 +8,10 @@ const cors = require('cors');
 const mongoose = require("mongoose");
 const DB_URL = process.env.DB_URL;
 const PORT=process.env.PORT;
+
+
+const productRouter=require("./Routes/productRoutes");
+const orderRouter=require("./Routes/orderRoutes");
 main().catch(err => console.log(err));
 async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/animestry')
@@ -29,6 +33,9 @@ app.use(cors());
 
 // Routes
 app.use(ErrorHandlerMiddleware)
+
+app.use("/products",jsonParser,productRouter);
+app.use("/orders",jsonParser,orderRouter);
 app.listen(PORT,()=>{
     console.log("listening on port "+PORT);
 })

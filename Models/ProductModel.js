@@ -7,6 +7,11 @@ const productSchema=new Schema({
         required:true,
         unique:true,
     },
+    anime:{
+        type:String,
+        required:true,
+        required:true,
+    },
     image_url:{
         type:String,
         required:true
@@ -20,7 +25,7 @@ const productSchema=new Schema({
         type:Number,
         required:true,
     },
-    desciption:{
+    description:{
         type:String,
         required:true,
         minLenght:25

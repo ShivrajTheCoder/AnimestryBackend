@@ -16,7 +16,7 @@ const userSchema=new Schema({
         type:String,
         required:true,
         minLenght:6,
-    }
+    },
 })
 
 module.exports=mongoose.model("User",userSchema);

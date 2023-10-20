@@ -1,7 +1,8 @@
 const { validationResult } = require("express-validator");
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
 const Product = require("../Models/ProductModel");
-const { NotFoundError } = require("../Utilities/CustomErrors");
+const Category = require("../Models/CategoryModel");
+const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors");
 const exp = module.exports;
 
 exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
@@ -16,7 +17,7 @@ exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 exp.GetProudctById = RouterAsncErrorHandler(async (req, res, next) => {
-    const { prodId } = req.query;
+    const { prodId } = req.params;
     try {
         const prod = await Product.findById(prodId);
         if (prod) {
@@ -33,18 +34,24 @@ exp.GetProudctById = RouterAsncErrorHandler(async (req, res, next) => {
 })
 
 exp.UpdateProduct = RouterAsncErrorHandler(async (req, res, next) => {
-    const { prodId } = req.query;
+    const { prodId } = req.params;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
 
     try {
-        const updated = await Product.findByIdAndUpdate(prodId, req.body);
+        const updated = await Product.findByIdAndUpdate(prodId, req.body, { new: true });
+        if (!updated) {
+            return res.status(404).json({
+                message: "Product not found",
+            });
+        }
+
         return res.status(200).json({
             product: updated,
             message: "Updated Product",
-        })
+        });
     }
     catch (error) {
         next(error);
@@ -58,11 +65,34 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     }
 
     try {
-        const newProd = new Product(req.body);
+        const newProd = new Product({ ...req.body, image_url: "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png" });
         await newProd.save();
         return res.status(201).json({
             message: "Product added",
             newProd,
+        })
+    }
+    catch (error) {
+        next(error);
+    }
+})
+
+exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const { name } = req.body;
+    try {
+        const category = await Category.find({ name });
+        if (category.length > 0) {
+            throw new DuplicateDataError();
+        }
+        const newCat = new Category(req.body);
+        const cat = await newCat.save();
+        return res.status(201).json({
+            message: "New Category added",
+            category: cat
         })
     }
     catch (error) {

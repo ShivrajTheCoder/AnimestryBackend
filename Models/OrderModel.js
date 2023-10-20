@@ -9,7 +9,19 @@ const orderSchema = new Schema({
     amount:{
         type:Number,
         required:true,
+    },
+    userId:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User",
+        required:true,
+    },
+    paymentStatus:{
+        type:Boolean,
+        requried:true,
+        default:false,
     }
 })
+
+//add address here
 
 module.exports=mongoose.model("Order",orderSchema);
