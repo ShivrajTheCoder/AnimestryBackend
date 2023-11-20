@@ -17,6 +17,11 @@ const userSchema=new Schema({
         required:true,
         minLenght:6,
     },
+    points:{
+        type:Number,
+        required:true,
+        default:0,
+    }
 })
 
 module.exports=mongoose.model("User",userSchema);

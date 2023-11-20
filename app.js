@@ -13,6 +13,7 @@ const PORT=process.env.PORT;
 const productRouter=require("./Routes/productRoutes");
 const orderRouter=require("./Routes/orderRoutes");
 const userRouter=require("./Routes/userRoutes");
+const reviewRouter=require("./Routes/reviewRoutes");
 
 main().catch(err => console.log(err));
 async function main() {
@@ -35,10 +36,10 @@ app.use(cors());
 
 // Routes
 app.use(ErrorHandlerMiddleware)
-
 app.use("/products",jsonParser,productRouter);
 app.use("/orders",jsonParser,orderRouter);
 app.use("/user",jsonParser,userRouter);
+app.use("/review",jsonParser,reviewRouter);
 app.listen(PORT,()=>{
     console.log("listening on port "+PORT);
 })

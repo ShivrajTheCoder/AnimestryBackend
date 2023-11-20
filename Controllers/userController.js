@@ -30,6 +30,7 @@ exp.Signup = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.Login = RouterAsncErrorHandler(async (req, res, next) => {
     const { email, password } = req.body;
+    // console.log(req.body);
     const JWT_SECRET_KEY=process.env.JWT_SECRET_KEY;
     try {
         // Find the user by email
@@ -37,7 +38,7 @@ exp.Login = RouterAsncErrorHandler(async (req, res, next) => {
 
         // If the user does not exist
         if (!user) {
-            throw new CredentialError();
+            throw new CredentialError("Invalid");
         }
 
         // Compare the provided password with the hashed password in the database
@@ -45,7 +46,7 @@ exp.Login = RouterAsncErrorHandler(async (req, res, next) => {
 
         // If the password is invalid
         if (!isPasswordValid) {
-            throw new CredentialError();
+            throw new CredentialError("Invalid");
         }
 
         // Password is valid, generate JWT token
