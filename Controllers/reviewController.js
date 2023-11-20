@@ -8,10 +8,10 @@ const exp=module.exports;
 
 exp.addReview=RouterAsncErrorHandler(async(req,res,next)=>{
     const {userId,description,productId}=req.body;
-    console.log(req.body,"request boyd");
+    // console.log(req.body,"request boyd");
 
     const errors = validationResult(req);
-    console.log(errors);
+    // console.log(errors);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
