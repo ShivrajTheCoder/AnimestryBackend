@@ -35,13 +35,13 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 app.use(cors());
 
 // Routes
-app.use(ErrorHandlerMiddleware)
+
 app.use("/products",jsonParser,productRouter);
 app.use("/orders",jsonParser,orderRouter);
 app.use("/user",jsonParser,userRouter);
 app.use("/review",jsonParser,reviewRouter);
 app.use("/cart",jsonParser,cartRouter);
-
+app.use(ErrorHandlerMiddleware)
 app.listen(PORT,()=>{
     console.log("listening on port "+PORT);
 })
