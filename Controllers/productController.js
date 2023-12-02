@@ -3,6 +3,7 @@ const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddlewar
 const Product = require("../Models/ProductModel");
 const Category = require("../Models/CategoryModel");
 const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors");
+const ProductModel = require("../Models/ProductModel");
 const exp = module.exports;
 
 exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
@@ -18,8 +19,10 @@ exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
 });
 exp.GetProudctById = RouterAsncErrorHandler(async (req, res, next) => {
     const { prodId } = req.params;
+    console.log(prodId,"here is the prodid");
     try {
-        const prod = await Product.findById(prodId);
+        const prod =await ProductModel.findById(prodId);
+        console.log(prod);
         if (prod) {
             return res.status(200).json({
                 product: prod,

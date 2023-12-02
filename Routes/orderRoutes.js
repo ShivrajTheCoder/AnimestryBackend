@@ -10,29 +10,43 @@ const {
 } = require("../Controllers/orderController");
 const mongoose = require("mongoose");
 
-router.route("/placeorder", [
-    body("userId").isMongoId(),
-    body("products").isArray().custom(value => {
-        // Check if all items in the array are valid MongoDB IDs
-        if (value.every(item => mongoose.Types.ObjectId.isValid(item))) {
+
+router.post(
+    '/placeorder',
+    [
+      body('userId').isMongoId(),
+      body('products')
+        .isArray()
+        .custom((value) => {
+          // Check if all items in the array have valid properties
+          if (
+            value.every(
+              (item) =>
+                mongoose.Types.ObjectId.isValid(item.productId) &&
+                typeof item.quantity === 'number' &&
+                item.quantity > 0
+            )
+          ) {
             return true;
-        } else {
-            throw new Error('Invalid MongoDB ID in products array');
-        }
-    })
-], placeOrder);
+          } else {
+            throw new Error('Invalid data in products array');
+          }
+        }),
+    ],
+    placeOrder
+  );
 
-router.route("/getallorders", getAllOrders);
+router.get("/getallorders", getAllOrders);
 
-router.route("/cancelorder/:orderId", [
+router.delete("/cancelorder/:orderId", [
     check("orderId").exists().isMongoId(),
 ], cancelOrder);
 
-router.route("/alluserorders/:userId", [
+router.get("/alluserorders/:userId", [
     check("userId").exists().isMongoId(),
 ], getAllUserOrders);
 
-router.route("/payment/:orderId", [
+router.post("/payment/:orderId", [
     check("orderId").exists().isMongoId(),
 ], paymentOrder);
 
