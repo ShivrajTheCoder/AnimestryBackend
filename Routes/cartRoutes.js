@@ -9,10 +9,9 @@ router.route("/addtocart")
         body("productId").exists().isMongoId(),
     ],addToCart);
 
-router.route("/removefromcart")
+router.route("/removefromcart/:productId")
     .delete([
-        body("userId").exists().isMongoId(),
-        body("productId").exists().isMongoId(),
+        check("productId").exists().isMongoId(),
     ],removeFromCart);
 
 router.route("/getusercart/:userId")

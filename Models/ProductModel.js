@@ -36,4 +36,6 @@ const productSchema=new Schema({
     }
 })
 
+//add color
+
 module.exports=mongoose.model("Product",productSchema);

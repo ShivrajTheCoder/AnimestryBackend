@@ -61,7 +61,9 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
-    const { productId, userId } = req.body;
+    const { productId} = req.params;
+    const userId='653245d8549b3c8dd758a6ee'
+    console.log(req.params,userId);
     try {
         const product = await ProductModel.findById(productId);
         const user = await UserModel.findById(userId);
