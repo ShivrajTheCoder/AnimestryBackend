@@ -7,14 +7,11 @@ const { NotFoundError } = require("../Utilities/CustomErrors");
 const exp = module.exports;
 
 exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
-    const { productId, userId, quantity } = req.body;
+    const { productId, userId, quantity, color, size } = req.body;
     try {
         const product = await ProductModel.findById(productId);
         const user = await UserModel.findById(userId);
-
-        console.log('Product:', product);
-        console.log('User:', user);
-
+        console.log(product,user);
         if (!product || !user) {
             throw new NotFoundError("Product or User not found!");
         }
@@ -25,10 +22,9 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
             // If the cart doesn't exist, create a new one
             cart = new CartModel({
                 userId: userId,
-                products: [{ productId, quantity: quantity || 1 }],
+                products: [{ productId, quantity: quantity || 1, color, size }],
             });
 
-            await cart.save();
         } else {
             // If the cart exists, check if the product is already in the cart
             const existingProductIndex = cart.products.findIndex(p => p.productId && p.productId.equals(productId));
@@ -42,13 +38,11 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
                 }
             } else {
                 // If the product is not in the cart, add it
-                cart.products.push({ productId, quantity: quantity || 1 });
+                cart.products.push({ productId, quantity: quantity || 1, color, size });
             }
-
-            await cart.save();
         }
 
-        console.log('Cart:', cart);
+        await cart.save();
 
         return res.status(200).json({
             message: "Product added to cart",
@@ -60,10 +54,10 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
+
 exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
-    const { productId} = req.params;
-    const userId='653245d8549b3c8dd758a6ee'
-    console.log(req.params,userId);
+    const { productId } = req.params;
+    const userId = '653245d8549b3c8dd758a6ee';
     try {
         const product = await ProductModel.findById(productId);
         const user = await UserModel.findById(userId);
@@ -124,11 +118,13 @@ exp.getUserCart = RouterAsncErrorHandler(async (req, res, next) => {
             return {
                 productId: cartProduct.productId,
                 quantity: cartProduct.quantity,
+                color: cartProduct.color,
+                size: cartProduct.size,
                 name: productDetails.name,
                 price: productDetails.price,
-                description:productDetails.description,
-                anime:productDetails.anime,
-                category:productDetails.category,
+                description: productDetails.description,
+                anime: productDetails.anime,
+                category: productDetails.category,
             };
         }));
 
