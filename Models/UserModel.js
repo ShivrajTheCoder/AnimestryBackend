@@ -21,7 +21,13 @@ const userSchema=new Schema({
         type:Number,
         required:true,
         default:0,
-    }
+    },
+    address:[
+        {
+            type:mongoose.Types.ObjectId,
+            ref:"Address"
+        }
+    ]
 })
 
 module.exports=mongoose.model("User",userSchema);

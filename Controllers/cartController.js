@@ -11,7 +11,7 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
     try {
         const product = await ProductModel.findById(productId);
         const user = await UserModel.findById(userId);
-        console.log(product,user);
+        // console.log(product,user);
         if (!product || !user) {
             throw new NotFoundError("Product or User not found!");
         }

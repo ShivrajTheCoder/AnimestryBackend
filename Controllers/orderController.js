@@ -1,4 +1,5 @@
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
+const Address = require("../Models/AddressModel");
 const Order = require("../Models/OrderModel");
 const Product = require("../Models/ProductModel"); // Import ProductModel
 const User = require("../Models/UserModel");
@@ -8,8 +9,9 @@ const { validationResult } = require("express-validator");
 const exp = module.exports;
 
 exp.placeOrder = RouterAsncErrorHandler(async (req, res, next) => {
-  const { products, userId } = req.body;
 
+  const { products, userId } = req.body;
+  const savedAddress = req.savedAddress;
   try {
     // Check if all products are valid
     const productData = await Product.find({ _id: { $in: products.map(p => p.productId) } });
@@ -29,6 +31,7 @@ exp.placeOrder = RouterAsncErrorHandler(async (req, res, next) => {
       products,
       amount: totalAmount,
       userId,
+      address:savedAddress._id
     });
 
     const ord = await newOrder.save();
@@ -37,6 +40,7 @@ exp.placeOrder = RouterAsncErrorHandler(async (req, res, next) => {
       message: "Order Placed",
       order: ord,
       userId,
+      savedAddress
     });
   } catch (error) {
     next(error);
@@ -102,6 +106,41 @@ exp.paymentOrder = RouterAsncErrorHandler(async (req, res, next) => {
       message: "Payment successful",
       order: payedOr,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+exp.saveAddress = RouterAsncErrorHandler(async (req, res, next) => {
+  const { userId, firstname, lastname, address, building, pincode, city, phonenumber } = req.body;
+
+  try {
+    // Create a new address
+    const newAddress = new Address({
+      firstname,
+      lastname,
+      address,
+      building,
+      pincode,
+      city,
+      phonenumber,
+    });
+
+    // Save the address to the database
+    const savedAddress = await newAddress.save();
+
+    // Attach the saved address to the request object
+    req.savedAddress = savedAddress;
+
+    // Update the user's address array with the new address ID
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $push: { address: savedAddress._id } },
+      { new: true }
+    );
+
+    // Call next to pass control to the next middleware (placeOrder)
+    next();
   } catch (error) {
     next(error);
   }

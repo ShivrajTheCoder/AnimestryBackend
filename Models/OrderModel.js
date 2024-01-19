@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+
 const cartProductSchema = new Schema({
     productId: {
         type: mongoose.Types.ObjectId,
@@ -7,27 +8,40 @@ const cartProductSchema = new Schema({
     },
     quantity: {
         type: Number,
-        default: 1, // You can set a default quantity if not provided
+        default: 1,
+    },
+    color: {
+        type: String,
+        maxLength:6,
+        minLenght:6
     },
 });
+
 const orderSchema = new Schema({
     products: [cartProductSchema],
-    amount:{
-        type:Number,
-        required:true,
+    amount: {
+        type: Number,
+        required: true,
     },
-    userId:{
-        type:mongoose.Schema.ObjectId,
-        ref:"User",
-        required:true,
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: true,
     },
-    paymentStatus:{
-        type:Boolean,
-        requried:true,
-        default:false,
-    }
-})
+    paymentStatus: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
+    address: {
+        type: mongoose.Types.ObjectId,
+        required: true,
+        ref: "Address",
+    },
+    date: {
+        type: Date,
+        default: Date.now,
+    },
+});
 
-//add address,date, here
-
-module.exports=mongoose.model("Order",orderSchema);
+module.exports = mongoose.model("Order", orderSchema);
