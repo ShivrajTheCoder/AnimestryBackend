@@ -28,7 +28,7 @@ const orderSchema = new Schema({
         ref: "User",
         required: true,
     },
-    paymentStatus: {
+    deliverStatus: {
         type: Boolean,
         required: true,
         default: false,

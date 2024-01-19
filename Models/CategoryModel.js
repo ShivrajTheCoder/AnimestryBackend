@@ -7,7 +7,9 @@ const categorySchema=new Schema({
         required:true,
         unique:true,
     },
-
+    discount:{
+        type:Number,
+    }
 })
 
 module.exports=mongoose.model("Category",categorySchema);

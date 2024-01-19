@@ -113,3 +113,19 @@ exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
         next(error);
     }
 });
+
+exp.GetAllCategroies=RouterAsncErrorHandler(async(req,res,next)=>{
+    try{
+        const categories=await CategoryModel.find({});
+        if(categories.length<1){
+            throw new NotFoundError("Categories not found!");
+        }
+        return res.status(200).json({
+            message:"Categories found!",
+            categories
+        })
+    }
+    catch(error){
+        next(error);
+    }
+})
