@@ -1,5 +1,6 @@
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
 const Address = require("../Models/AddressModel");
+const CartModel = require("../Models/CartModel");
 const Order = require("../Models/OrderModel");
 const Product = require("../Models/ProductModel"); // Import ProductModel
 const User = require("../Models/UserModel");
@@ -31,11 +32,11 @@ exp.placeOrder = RouterAsncErrorHandler(async (req, res, next) => {
       products,
       amount: totalAmount,
       userId,
-      address:savedAddress._id
+      address: savedAddress._id
     });
 
     const ord = await newOrder.save();
-
+    await CartModel.findOneAndDelete({ userId });
     return res.status(201).json({
       message: "Order Placed",
       order: ord,
