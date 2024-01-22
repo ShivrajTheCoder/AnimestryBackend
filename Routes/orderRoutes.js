@@ -24,9 +24,9 @@ router.get("/alluserorders/:userId", [
   check("userId").exists().isMongoId(),
 ], getAllUserOrders);
 
-router.post("/payment/:orderId", [
-  check("orderId").exists().isMongoId(),
-], paymentOrder);
+// router.post("/payment/:orderId", [
+//   check("orderId").exists().isMongoId(),
+// ], paymentOrder);
 
 router.post(
   "/placeorder",

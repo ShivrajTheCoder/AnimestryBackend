@@ -98,19 +98,19 @@ exp.cancelOrder = RouterAsncErrorHandler(async (req, res, next) => {
   }
 });
 
-exp.paymentOrder = RouterAsncErrorHandler(async (req, res, next) => {
-  const { orderId } = req.body;
-  // Integrate razorpay here
-  try {
-    const payedOr = await Order.findByIdAndUpdate(orderId, { paymentStatus: true });
-    return res.status(200).json({
-      message: "Payment successful",
-      order: payedOr,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+// exp.paymentOrder = RouterAsncErrorHandler(async (req, res, next) => {
+//   const { orderId } = req.body;
+//   // Integrate razorpay here
+//   try {
+//     const payedOr = await Order.findByIdAndUpdate(orderId, { paymentStatus: true });
+//     return res.status(200).json({
+//       message: "Payment successful",
+//       order: payedOr,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 exp.saveAddress = RouterAsncErrorHandler(async (req, res, next) => {
   const { userId, firstname, lastname, address, building, pincode, city, phonenumber } = req.body;

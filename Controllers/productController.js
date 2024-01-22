@@ -129,3 +129,17 @@ exp.GetAllCategroies=RouterAsncErrorHandler(async(req,res,next)=>{
         next(error);
     }
 })
+
+exp.DeleteProduct=RouterAsncErrorHandler(async(req,res,next)=>{
+    const {productId}=req.params;
+    try{
+        const deleted=await ProductModel.findByIdAndDelete(productId);
+        return res.status(200).json({
+            message:"Product deleted",
+            deleted
+        })
+    }
+    catch(error){
+        next(error);
+    }
+})

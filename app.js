@@ -15,6 +15,7 @@ const orderRouter=require("./Routes/orderRoutes");
 const userRouter=require("./Routes/userRoutes");
 const reviewRouter=require("./Routes/reviewRoutes");
 const cartRouter=require("./Routes/cartRoutes");
+const adminRouter=require("./Routes/adminRoutes");
 main().catch(err => console.log(err));
 async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/animestry')
@@ -41,6 +42,7 @@ app.use("/orders",jsonParser,orderRouter);
 app.use("/user",jsonParser,userRouter);
 app.use("/review",jsonParser,reviewRouter);
 app.use("/cart",jsonParser,cartRouter);
+app.use("/admin",jsonParser,adminRouter)
 app.use(ErrorHandlerMiddleware)
 app.listen(PORT,()=>{
     console.log("listening on port "+PORT);
