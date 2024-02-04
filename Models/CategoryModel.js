@@ -9,6 +9,10 @@ const categorySchema=new Schema({
     },
     discount:{
         type:Number,
+    },
+    image_url:{
+        type:String,
+        required:true
     }
 })
 

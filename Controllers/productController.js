@@ -7,6 +7,7 @@ const Fuse = require("fuse.js");
 const { uploadImage } = require("../Utilities/aws/S3");
 const exp = module.exports;
 const fs = require("fs");
+const { response } = require("express");
 const MOBILE_ITEMS_PER_PAGE = 4;
 const DESKTOP_ITEMS_PER_PAGE = 8;
 
@@ -158,11 +159,11 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     }
 
     // If all validations pass, proceed to the next steps
-    console.log(req.file, req.body);
+    // console.log(req.file, req.body);
     try {
 
         const response = await uploadImage(req.file, name);
-        console.log(response);
+        // console.log(response);
         const image_url = response.Location;
         const newProd = new ProductModel({
             ...req.body, image_url
@@ -185,23 +186,37 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
+    
     const { name } = req.body;
+    if(!name || name.length<2){
+        return res.status(422).json({
+            message:"Invalid name"
+        })
+    }
+    if(!req.file){
+        return res.status(422).json({
+            message:"No image chosen",
+        })
+    }
     try {
         const category = await CategoryModel.find({ name });
         if (category.length > 0) {
             throw new DuplicateDataError();
         }
-        const newCat = new CategoryModel(req.body);
+        const response=await uploadImage(req.file,name);
+        const image_url=response.Location;
+        const newCat = new CategoryModel({name,image_url});
+        // console.log(newCat);
         const cat = await newCat.save();
+        fs.unlinkSync(req.file.path);
         return res.status(201).json({
             message: "New Category added",
             category: cat,
         });
     } catch (error) {
+        if (req.file) {
+            fs.unlinkSync(req.file.path);
+        }
         next(error);
     }
 });

@@ -34,14 +34,6 @@ router.route("/updateprod/:prodId")
         body().custom(atLeastOne),
     ], UpdateProduct);
 
-// router.route("/addproduct").post([
-//     body("name").exists(),
-//     body("anime").exists(),
-//     body("category").exists().isMongoId(),
-//     body("price").exists().isNumeric(),
-//     body("description").exists(),
-//     body("colorOptions").exists().isArray(), // mandatory colorOptions
-// ],upload.single('image'), AddProduct);
 router.route("/addproduct").post(upload.single('image'), AddProduct);
 
 router.route("/addnewcategory").post(upload.single("image"), AddNewCategory);
