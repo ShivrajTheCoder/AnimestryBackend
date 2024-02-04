@@ -3,7 +3,7 @@ const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddlewar
 const ProductModel = require("../Models/ProductModel");
 const CategoryModel = require("../Models/CategoryModel");
 const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors");
-
+const Fuse = require("fuse.js");
 const exp = module.exports;
 
 exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
@@ -140,6 +140,38 @@ exp.DeleteProduct=RouterAsncErrorHandler(async(req,res,next)=>{
         })
     }
     catch(error){
+        next(error);
+    }
+})
+
+exp.SearchProducts=RouterAsncErrorHandler(async(req,res,next)=>{
+    try {
+        const { name, category, anime } = req.query;
+
+        const allProducts = await ProductModel.find(); // Fetch all products for fuzzy search
+
+        const fuseOptions = {
+            keys: ["name", "category", "anime"],
+            threshold: 0.4, // Adjust the threshold based on your preference
+        };
+
+        const fuse = new Fuse(allProducts, fuseOptions);
+
+        // Perform a fuzzy search for each parameter
+        const nameResults = name ? fuse.search(name) : allProducts;
+        const categoryResults = category ? fuse.search(category) : allProducts;
+        const animeResults = anime ? fuse.search(anime) : allProducts;
+
+        // Combine results to remove duplicates and maintain relevance
+        const combinedResults = Array.from(
+            new Set([...nameResults, ...categoryResults, ...animeResults])
+        );
+
+        return res.status(200).json({
+            results:combinedResults,
+            message:"Results found!"
+        })
+    } catch (error) {
         next(error);
     }
 })

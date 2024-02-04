@@ -1,6 +1,6 @@
 const express = require("express");
 const { check, body } = require("express-validator");
-const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd, GetAllCategroies, DeleteProduct } = require("../Controllers/productController");
+const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd, GetAllCategroies, DeleteProduct, SearchProducts } = require("../Controllers/productController");
 const { CustomError } = require("../Utilities/CustomErrors");
 const router = express.Router();
 
@@ -54,4 +54,8 @@ router.route("/deleteproduct/:productId")
         check("productId").exists().isMongoId()
     ],DeleteProduct)
 
+router.route("/search/:query")
+    .get([
+        check("query").exists()
+    ],SearchProducts)
 module.exports = router;

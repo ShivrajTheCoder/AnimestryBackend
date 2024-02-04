@@ -18,7 +18,7 @@ const cartRouter=require("./Routes/cartRoutes");
 const adminRouter=require("./Routes/adminRoutes");
 main().catch(err => console.log(err));
 async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/animestry')
+  await mongoose.connect(DB_URL)
   .then(()=>{
     console.log("Connected to database");
   });
