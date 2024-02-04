@@ -18,7 +18,7 @@ exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
         const itemsPerPage = isMobile ? MOBILE_ITEMS_PER_PAGE : DESKTOP_ITEMS_PER_PAGE;
 
         const page = parseInt(req.query.page) || 1;
-        const products = await ProductModel.find({})
+        const products = await ProductModel.find({active:true})
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage);
 
@@ -41,11 +41,9 @@ exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
-
-
 exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
     try {
-        const trendingProducts = await ProductModel.find().sort({ unitsSold: -1 }).limit(3);
+        const trendingProducts = await ProductModel.find({active:true}).sort({ unitsSold: -1 }).limit(3);
         return res.status(200).json({
             message: "Trending products",
             trendingProducts,
@@ -240,7 +238,7 @@ exp.GetAllCategroies = RouterAsncErrorHandler(async (req, res, next) => {
 exp.DeleteProduct = RouterAsncErrorHandler(async (req, res, next) => {
     const { productId } = req.params;
     try {
-        const deleted = await ProductModel.findByIdAndDelete(productId);
+        const deleted = await ProductModel.findByIdAndUpdate(productId,{active:false});
         return res.status(200).json({
             message: "Product deleted",
             deleted

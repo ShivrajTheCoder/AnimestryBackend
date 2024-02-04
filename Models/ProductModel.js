@@ -37,6 +37,10 @@ const productSchema = new Schema({
         type: [String],
         default: [],
     },
+    active:{
+        type:Boolean,
+        default:true,
+    }
 });
 
 module.exports = mongoose.model("Product", productSchema);
