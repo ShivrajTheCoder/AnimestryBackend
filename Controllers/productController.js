@@ -6,13 +6,30 @@ const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors
 const Fuse = require("fuse.js");
 const exp = module.exports;
 
+const MOBILE_ITEMS_PER_PAGE = 4;
+const DESKTOP_ITEMS_PER_PAGE = 8;
+
 exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
     try {
-        const products = await ProductModel.find({});
+        const isMobile = false;
+
+        const itemsPerPage = isMobile ? MOBILE_ITEMS_PER_PAGE : DESKTOP_ITEMS_PER_PAGE;
+
+        const page = parseInt(req.query.page) || 1;
+        const products = await ProductModel.find({})
+            .skip((page - 1) * itemsPerPage)
+            .limit(itemsPerPage);
+
+        const totalProducts = await ProductModel.countDocuments({});
+
         if (products.length > 0) {
+            const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
             return res.status(200).json({
                 message: "Products found!",
                 products,
+                currentPage: page,
+                totalPages,
             });
         } else {
             throw new NotFoundError("Products not found!");
@@ -21,6 +38,8 @@ exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
         next(error);
     }
 });
+
+
 
 exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
     try {
