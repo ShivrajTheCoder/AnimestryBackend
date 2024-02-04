@@ -4,8 +4,9 @@ const ProductModel = require("../Models/ProductModel");
 const CategoryModel = require("../Models/CategoryModel");
 const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors");
 const Fuse = require("fuse.js");
+const { uploadImage } = require("../Utilities/aws/S3");
 const exp = module.exports;
-
+const fs = require("fs");
 const MOBILE_ITEMS_PER_PAGE = 4;
 const DESKTOP_ITEMS_PER_PAGE = 8;
 
@@ -94,21 +95,93 @@ exp.UpdateProduct = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
+    // Validate fields
+    const { name, price, description, category, anime, colorOptions } = req.body;
+
+    if (!req.file) {
+        return res.status(422).json({
+            message: "Image not present",
+        });
     }
 
-    try {
-        const newProd = new ProductModel({ ...req.body, image_url: "https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png" });
-        await newProd.save();
-        return res.status(201).json({
-            message: "Product added",
-            newProd,
+    if (!name || !price || !description || !category || !anime || !colorOptions) {
+        return res.status(422).json({
+            message: "All fields are mandatory",
         });
-    } catch (error) {
+    }
+
+    if (description.length < 50) {
+        return res.status(422).json({
+            message: "Description should be at least 50 characters long",
+        });
+    }
+
+    if (isNaN(price) || price <= 0) {
+        return res.status(422).json({
+            message: "Price should be a positive number",
+        });
+    }
+
+    // If all validations pass, proceed to the next steps
+    console.log(req.file, req.body);
+
+    return res.status(200).json({
+        message: 'Received'
+    });
+});
+exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
+    // Validate fields
+    const { name, price, description, category, anime, colorOptions } = req.body;
+
+    if (!req.file) {
+        return res.status(422).json({
+            message: "Image not present",
+        });
+    }
+
+    if (!name || !price || !description || !category || !anime || !colorOptions) {
+        return res.status(422).json({
+            message: "All fields are mandatory",
+        });
+    }
+
+    if (description.length < 50) {
+        return res.status(422).json({
+            message: "Description should be at least 50 characters long",
+        });
+    }
+
+    if (isNaN(price) || price <= 0) {
+        return res.status(422).json({
+            message: "Price should be a positive number",
+        });
+    }
+
+    // If all validations pass, proceed to the next steps
+    console.log(req.file, req.body);
+    try {
+
+        const response = await uploadImage(req.file, name);
+        console.log(response);
+        const image_url = response.Location;
+        const newProd = new ProductModel({
+            ...req.body, image_url
+
+        });
+        const savedPro = await newProd.save();
+        fs.unlinkSync(req.file.path);
+        return res.status(201).json({
+            message: 'Product added',
+            product: savedPro
+        });
+    }
+    catch (error) {
+        if (req.file) {
+            fs.unlinkSync(req.file.path);
+        }
         next(error);
     }
+
 });
 
 exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
@@ -133,37 +206,37 @@ exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
-exp.GetAllCategroies=RouterAsncErrorHandler(async(req,res,next)=>{
-    try{
-        const categories=await CategoryModel.find({});
-        if(categories.length<1){
+exp.GetAllCategroies = RouterAsncErrorHandler(async (req, res, next) => {
+    try {
+        const categories = await CategoryModel.find({});
+        if (categories.length < 1) {
             throw new NotFoundError("Categories not found!");
         }
         return res.status(200).json({
-            message:"Categories found!",
+            message: "Categories found!",
             categories
         })
     }
-    catch(error){
+    catch (error) {
         next(error);
     }
 })
 
-exp.DeleteProduct=RouterAsncErrorHandler(async(req,res,next)=>{
-    const {productId}=req.params;
-    try{
-        const deleted=await ProductModel.findByIdAndDelete(productId);
+exp.DeleteProduct = RouterAsncErrorHandler(async (req, res, next) => {
+    const { productId } = req.params;
+    try {
+        const deleted = await ProductModel.findByIdAndDelete(productId);
         return res.status(200).json({
-            message:"Product deleted",
+            message: "Product deleted",
             deleted
         })
     }
-    catch(error){
+    catch (error) {
         next(error);
     }
 })
 
-exp.SearchProducts=RouterAsncErrorHandler(async(req,res,next)=>{
+exp.SearchProducts = RouterAsncErrorHandler(async (req, res, next) => {
     try {
         const { name, category, anime } = req.query;
 
@@ -187,8 +260,8 @@ exp.SearchProducts=RouterAsncErrorHandler(async(req,res,next)=>{
         );
 
         return res.status(200).json({
-            results:combinedResults,
-            message:"Results found!"
+            results: combinedResults,
+            message: "Results found!"
         })
     } catch (error) {
         next(error);

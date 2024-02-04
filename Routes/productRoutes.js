@@ -3,7 +3,8 @@ const { check, body } = require("express-validator");
 const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd, GetAllCategroies, DeleteProduct, SearchProducts } = require("../Controllers/productController");
 const { CustomError } = require("../Utilities/CustomErrors");
 const router = express.Router();
-
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' })
 router.route("/gettreandingproducts")
     .get(GetTrendingProd);
 
@@ -33,18 +34,17 @@ router.route("/updateprod/:prodId")
         body().custom(atLeastOne),
     ], UpdateProduct);
 
-router.route("/addproduct").post([
-    body("name").exists(),
-    body("anime").exists(),
-    body("category").exists().isMongoId(),
-    body("price").exists().isNumeric(),
-    body("description").exists(),
-    body("colorOptions").exists().isArray(), // mandatory colorOptions
-], AddProduct);
+// router.route("/addproduct").post([
+//     body("name").exists(),
+//     body("anime").exists(),
+//     body("category").exists().isMongoId(),
+//     body("price").exists().isNumeric(),
+//     body("description").exists(),
+//     body("colorOptions").exists().isArray(), // mandatory colorOptions
+// ],upload.single('image'), AddProduct);
+router.route("/addproduct").post(upload.single('image'), AddProduct);
 
-router.route("/addnewcategory").post([
-    body("name").exists(),
-], AddNewCategory);
+router.route("/addnewcategory").post(upload.single("image"), AddNewCategory);
 
 router.route("/getallcategories")
     .get(GetAllCategroies)
@@ -58,4 +58,7 @@ router.route("/search/:query")
     .get([
         check("query").exists()
     ],SearchProducts)
+
+
+
 module.exports = router;
