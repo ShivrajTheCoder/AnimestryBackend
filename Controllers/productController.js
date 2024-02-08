@@ -134,7 +134,7 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
 
         });
         const savedPro = await newProd.save();
-        console.log(savedPro);
+        // console.log(savedPro);
         fs.unlinkSync(req.file.path);
         return res.status(201).json({
             message: 'Product added',

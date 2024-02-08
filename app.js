@@ -16,6 +16,7 @@ const userRouter=require("./Routes/userRoutes");
 const reviewRouter=require("./Routes/reviewRoutes");
 const cartRouter=require("./Routes/cartRoutes");
 const adminRouter=require("./Routes/adminRoutes");
+const figureRouter=require("./Routes/figureRoutes");
 main().catch(err => console.log(err));
 async function main() {
   await mongoose.connect(DB_URL)
@@ -42,7 +43,8 @@ app.use("/orders",jsonParser,orderRouter);
 app.use("/user",jsonParser,userRouter);
 app.use("/review",jsonParser,reviewRouter);
 app.use("/cart",jsonParser,cartRouter);
-app.use("/admin",jsonParser,adminRouter)
+app.use("/admin",jsonParser,adminRouter);
+app.use("/figures",jsonParser,figureRouter);
 app.use(ErrorHandlerMiddleware)
 app.listen(PORT,()=>{
     console.log("listening on port "+PORT);
