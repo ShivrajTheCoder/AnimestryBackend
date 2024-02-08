@@ -16,7 +16,7 @@ const s3=new S3({
 
 function uploadImage(file,name) {
     // Read the file from the local filesystem
-    console.log(name,"form", bucketName, access_key, secret_key,region)
+    // console.log(name,"form", bucketName, access_key, secret_key,region)
     const fileContent = fs.readFileSync(file.path);
   
     // Specify S3 upload parameters

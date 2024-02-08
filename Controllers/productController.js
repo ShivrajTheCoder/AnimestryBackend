@@ -93,41 +93,7 @@ exp.UpdateProduct = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
-exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
-    // Validate fields
-    const { name, price, description, category, anime, colorOptions } = req.body;
 
-    if (!req.file) {
-        return res.status(422).json({
-            message: "Image not present",
-        });
-    }
-
-    if (!name || !price || !description || !category || !anime || !colorOptions) {
-        return res.status(422).json({
-            message: "All fields are mandatory",
-        });
-    }
-
-    if (description.length < 50) {
-        return res.status(422).json({
-            message: "Description should be at least 50 characters long",
-        });
-    }
-
-    if (isNaN(price) || price <= 0) {
-        return res.status(422).json({
-            message: "Price should be a positive number",
-        });
-    }
-
-    // If all validations pass, proceed to the next steps
-    console.log(req.file, req.body);
-
-    return res.status(200).json({
-        message: 'Received'
-    });
-});
 exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     // Validate fields
     const { name, price, description, category, anime, colorOptions } = req.body;
@@ -164,10 +130,11 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
         // console.log(response);
         const image_url = response.Location;
         const newProd = new ProductModel({
-            ...req.body, image_url
+            ...req.body, image_url,colorOptions:JSON.parse(colorOptions)
 
         });
         const savedPro = await newProd.save();
+        console.log(savedPro);
         fs.unlinkSync(req.file.path);
         return res.status(201).json({
             message: 'Product added',
