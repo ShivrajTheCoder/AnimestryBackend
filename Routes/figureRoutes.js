@@ -1,7 +1,8 @@
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
 const { getAllFigures, deleteFigure, updateFigure, getFigure, addFigure } = require('../Controllers/figureController');
-
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 const router = express.Router();
 
@@ -20,24 +21,18 @@ const validate = (validations) => {
     };
 };
 
-router.post('/add',
-    validate([
-        body('name').notEmpty(),
-        body('anime').notEmpty(),
-        body('image_url').notEmpty(),
-        body('description').isLength({ min: 25 })
-    ]),
+router.post('/addnewfigure',
     addFigure
 );
 
-router.get('/:id',
+router.get('/getfigurebyid/:id',
     validate([
         param('id').notEmpty().isMongoId()
     ]),
     getFigure
 );
 
-router.put('/:id',
+router.put('/updatefigure/:id',
     validate([
         param('id').notEmpty().isMongoId(),
         body('name').optional(),
@@ -48,14 +43,14 @@ router.put('/:id',
     updateFigure
 );
 
-router.delete('/:id',
+router.delete('/deletefigure/:id',
     validate([
         param('id').notEmpty().isMongoId()
     ]),
     deleteFigure
 );
 
-router.get('/all',
+router.get('/getallfigures',
     getAllFigures
 );
 

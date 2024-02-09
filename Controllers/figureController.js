@@ -5,17 +5,18 @@ const Anime = require('../Models/AnimeFigureModel');
 const exp = module.exports;
 
 exp.addFigure = RouterAsncErrorHandler(async (req, res) => {
-    const { name, anime, image_url, other_images, description } = req.body;
-    const newFigure = await Anime.create({
-        name,
-        anime,
-        image_url,
-        other_images,
-        description
-    });
+    const { name, anime, image, other_images, description } = req.body;
+    // const newFigure = await Anime.create({
+    //     name,
+    //     anime,
+    //     image_url,
+    //     other_images,
+    //     description
+    // });
+    console.log(req.body);
     return res.status(200).json({
         message: "Figure Added",
-        figure: newFigure
+        // figure: newFigure
     });
 });
 
