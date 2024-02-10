@@ -27,6 +27,10 @@ const animeFigureSchema=new Schema({
     active:{
         type:Boolean,
         default:true
+    },
+    unitsSold:{
+        type:Number,
+        default:0
     }
 })
 

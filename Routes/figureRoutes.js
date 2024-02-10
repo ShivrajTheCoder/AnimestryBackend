@@ -22,6 +22,7 @@ const validate = (validations) => {
 };
 
 router.post('/addnewfigure',
+    upload.single("image"),
     addFigure
 );
 
