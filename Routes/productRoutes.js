@@ -1,6 +1,6 @@
 const express = require("express");
 const { check, body } = require("express-validator");
-const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd, GetAllCategroies, DeleteProduct, SearchProducts } = require("../Controllers/productController");
+const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd,GetAllCategories, DeleteProduct, SearchProducts } = require("../Controllers/productController");
 const { CustomError } = require("../Utilities/CustomErrors");
 const router = express.Router();
 const multer = require('multer')
@@ -39,7 +39,7 @@ router.route("/addproduct").post(upload.single('image'), AddProduct);
 router.route("/addnewcategory").post(upload.single("image"), AddNewCategory);
 
 router.route("/getallcategories")
-    .get(GetAllCategroies)
+    .get(GetAllCategories)
 
 router.route("/deleteproduct/:productId")
     .delete([

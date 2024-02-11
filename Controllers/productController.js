@@ -11,18 +11,18 @@ const { response } = require("express");
 const MOBILE_ITEMS_PER_PAGE = 4;
 const DESKTOP_ITEMS_PER_PAGE = 8;
 
+const isMobile = false; // This should be determined based on the request, assuming it's hardcoded for demonstration purposes
+
+const itemsPerPage = isMobile ? MOBILE_ITEMS_PER_PAGE : DESKTOP_ITEMS_PER_PAGE;
+
 exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
     try {
-        const isMobile = false;
-
-        const itemsPerPage = isMobile ? MOBILE_ITEMS_PER_PAGE : DESKTOP_ITEMS_PER_PAGE;
-
         const page = parseInt(req.query.page) || 1;
-        const products = await ProductModel.find({active:true})
+        const products = await ProductModel.find({ active: true })
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage);
 
-        const totalProducts = await ProductModel.countDocuments({});
+        const totalProducts = await ProductModel.countDocuments({ active: true });
 
         if (products.length > 0) {
             const totalPages = Math.ceil(totalProducts / itemsPerPage);
@@ -40,6 +40,7 @@ exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
         next(error);
     }
 });
+
 
 exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
     try {
@@ -186,21 +187,42 @@ exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
-exp.GetAllCategroies = RouterAsncErrorHandler(async (req, res, next) => {
+exp.GetAllCategories = RouterAsncErrorHandler(async (req, res, next) => {
     try {
-        const categories = await CategoryModel.find({});
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 8; // Default limit of 8 items per page
+
+        const categories = await CategoryModel.find({})
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const totalCategories = await CategoryModel.countDocuments({});
+
+        const totalPages = Math.ceil(totalCategories / limit);
+
+        const paginationInfo = {
+            currentPage: page,
+            totalPages,
+            totalCategories
+        };
+        // console.log(totalPages,totalCategories);
+
+        // If there are no categories found, throw an error
         if (categories.length < 1) {
             throw new NotFoundError("Categories not found!");
         }
+
         return res.status(200).json({
             message: "Categories found!",
-            categories
-        })
-    }
-    catch (error) {
+            categories,
+            paginationInfo
+        });
+    } catch (error) {
         next(error);
     }
-})
+});
+
+
 
 exp.DeleteProduct = RouterAsncErrorHandler(async (req, res, next) => {
     const { productId } = req.params;
