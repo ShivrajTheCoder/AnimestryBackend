@@ -35,8 +35,21 @@ exp.placeOrder = RouterAsncErrorHandler(async (req, res, next) => {
       address: savedAddress._id
     });
 
+    // Save the new order
     const ord = await newOrder.save();
+
+    // Update units sold for each product
+    products.forEach(async (product) => {
+      const matchedProduct = productData.find(p => p._id.toString() === product.productId.toString());
+      await Product.updateOne(
+        { _id: matchedProduct._id },
+        { $inc: { unitsSold: product.quantity } }
+      );
+    });
+
+    // Clear user's cart
     await CartModel.findOneAndDelete({ userId });
+
     return res.status(201).json({
       message: "Order Placed",
       order: ord,
@@ -47,6 +60,7 @@ exp.placeOrder = RouterAsncErrorHandler(async (req, res, next) => {
     next(error);
   }
 });
+
 
 exp.getAllOrders = RouterAsncErrorHandler(async (req, res, next) => {
   try {

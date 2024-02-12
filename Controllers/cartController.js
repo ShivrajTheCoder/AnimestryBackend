@@ -67,10 +67,10 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
     const { productId } = req.params;
-    console.log(req.body)
+    // console.log(req.body)
     const {figure,complete}=req.body;
     const userId = '65c114022931680e9a1531ed';
-    console.log(productId,figure)
+    // console.log(productId,figure)
     try {
         let product=null;
         if (figure) {
@@ -83,7 +83,7 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
 
         
         const user = await UserModel.findById(userId);
-        console.log(product,user,"here it is")
+        // console.log(product,user,"here it is")
         if (!product || !user) {
             throw new NotFoundError("Product or User not found!");
         }
