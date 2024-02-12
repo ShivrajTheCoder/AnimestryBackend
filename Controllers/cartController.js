@@ -20,7 +20,7 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
         }
 
         const user = await UserModel.findById(userId);
-
+        console.log(user,product);
         if (!product || !user) {
             throw new NotFoundError("Product or User not found!");
         }
@@ -66,21 +66,24 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
 
 
 exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
-    const { productId, figure = false } = req.params;
-    const userId = '653245d8549b3c8dd758a6ee';
+    const { productId } = req.params;
+    console.log(req.body)
+    const {figure,complete}=req.body;
+    const userId = '65c114022931680e9a1531ed';
+    console.log(productId,figure)
     try {
-        let productModel;
+        let product=null;
         if (figure) {
             // If figure is true, use FigureModel to find the product
-            productModel = AnimeFigureModel;
+            product =await AnimeFigureModel.findById(productId);
         } else {
             // Otherwise, use ProductModel
-            productModel = ProductModel;
+            product =await ProductModel.findById(productId);
         }
 
-        const product = await productModel.findById(productId);
+        
         const user = await UserModel.findById(userId);
-
+        console.log(product,user,"here it is")
         if (!product || !user) {
             throw new NotFoundError("Product or User not found!");
         }
@@ -91,15 +94,20 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
             throw new NotFoundError("User not found or product not in the cart");
         }
 
-        const lastProductIndex = updatedCart.products.findIndex(p => p.productId.equals(productId));
+        const productIndex = updatedCart.products.findIndex(p => p.productId.equals(productId));
 
-        if (lastProductIndex !== -1) {
-            // Decrease the quantity of the last product
-            if (updatedCart.products[lastProductIndex].quantity > 1) {
-                updatedCart.products[lastProductIndex].quantity -= 1;
+        if (productIndex !== -1) {
+            if (complete) {
+                // If complete is true, remove the product completely from the cart
+                updatedCart.products.splice(productIndex, 1);
             } else {
-                // If the quantity is 1, remove the product from the array
-                updatedCart.products.splice(lastProductIndex, 1);
+                // If complete is false, decrease the quantity of the product
+                if (updatedCart.products[productIndex].quantity > 1) {
+                    updatedCart.products[productIndex].quantity -= 1;
+                } else {
+                    // If the quantity is 1, remove the product from the array
+                    updatedCart.products.splice(productIndex, 1);
+                }
             }
 
             // Save the updated cart
@@ -118,6 +126,7 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
         next(error);
     }
 });
+
 
 
 // getUserCart
@@ -155,6 +164,7 @@ exp.getUserCart = RouterAsncErrorHandler(async (req, res, next) => {
                 productId: cartProduct.productId,
                 quantity: cartProduct.quantity,
                 color: cartProduct.color,
+                figure:cartProduct.figure,
                 size: cartProduct.size,
                 name: productDetails.name,
                 price: productDetails.price,

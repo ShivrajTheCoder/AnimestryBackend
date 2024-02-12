@@ -42,7 +42,7 @@ app.use("/products",jsonParser,productRouter);
 app.use("/orders",jsonParser,orderRouter);
 app.use("/user",jsonParser,userRouter);
 app.use("/review",jsonParser,reviewRouter);
-app.use("/cart",jsonParser,cartRouter);
+app.use("/cart",jsonParser,urlencodedParser,cartRouter);
 app.use("/admin",jsonParser,adminRouter);
 app.use("/figures",jsonParser,figureRouter);
 app.use(ErrorHandlerMiddleware)

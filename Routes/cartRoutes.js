@@ -12,9 +12,10 @@ router.route("/addtocart").post([
     body("figure").optional().isBoolean()
 ], addToCart);
 
-router.route("/removefromcart/:productId").delete([
+router.route("/removefromcart/:productId").post([
     check("productId").exists().isMongoId(),
     body("figure").optional().isBoolean(),
+    body("complete").optional().isBoolean(),
 ], removeFromCart);
 
 router.route("/getusercart/:userId").get([
