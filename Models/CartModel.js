@@ -5,7 +5,6 @@ const cartProductSchema = new Schema({
     productId: {
         type: mongoose.Types.ObjectId,
         required: true,
-        ref: "Product",
     },
     quantity: {
         type: Number,
@@ -21,6 +20,11 @@ const cartProductSchema = new Schema({
         enum: ['XS', 'S', 'M', 'L', 'XL'],
         required: true,
     },
+    figure:{
+        type:Boolean,
+        default:false,
+        required:true
+    }
 });
 
 const cartSchema = new Schema({

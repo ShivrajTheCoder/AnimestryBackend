@@ -9,10 +9,12 @@ router.route("/addtocart").post([
     body("color").exists().isString(),
     body("size").exists().isIn(['XS', 'S', 'M', 'L', 'XL']),
     body("quantity").exists().isInt({ min: 1 }), // Add quantity validation
+    body("figure").optional().isBoolean()
 ], addToCart);
 
 router.route("/removefromcart/:productId").delete([
     check("productId").exists().isMongoId(),
+    body("figure").optional().isBoolean(),
 ], removeFromCart);
 
 router.route("/getusercart/:userId").get([

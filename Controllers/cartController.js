@@ -1,4 +1,5 @@
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
+const AnimeFigureModel = require("../Models/AnimeFigureModel");
 const CartModel = require("../Models/CartModel");
 const ProductModel = require("../Models/ProductModel");
 const UserModel = require("../Models/UserModel");
@@ -7,11 +8,19 @@ const { NotFoundError } = require("../Utilities/CustomErrors");
 const exp = module.exports;
 
 exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
-    const { productId, userId, quantity, color, size } = req.body;
+    const { productId, userId, quantity, color, size, figure = false } = req.body;
     try {
-        const product = await ProductModel.findById(productId);
+        let product;
+        if (figure) {
+            // If the product is a figure, use the FigureModel
+            product = await AnimeFigureModel.findById(productId);
+        } else {
+            // Otherwise, use the ProductModel
+            product = await ProductModel.findById(productId);
+        }
+
         const user = await UserModel.findById(userId);
-        // console.log(product,user);
+
         if (!product || !user) {
             throw new NotFoundError("Product or User not found!");
         }
@@ -38,7 +47,7 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
                 }
             } else {
                 // If the product is not in the cart, add it
-                cart.products.push({ productId, quantity: quantity || 1, color, size });
+                cart.products.push({ productId, quantity: quantity || 1, color, size,figure });
             }
         }
 
@@ -55,11 +64,21 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 
+
 exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
-    const { productId } = req.params;
+    const { productId, figure = false } = req.params;
     const userId = '653245d8549b3c8dd758a6ee';
     try {
-        const product = await ProductModel.findById(productId);
+        let productModel;
+        if (figure) {
+            // If figure is true, use FigureModel to find the product
+            productModel = AnimeFigureModel;
+        } else {
+            // Otherwise, use ProductModel
+            productModel = ProductModel;
+        }
+
+        const product = await productModel.findById(productId);
         const user = await UserModel.findById(userId);
 
         if (!product || !user) {
@@ -100,21 +119,38 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
+
 // getUserCart
 exp.getUserCart = RouterAsncErrorHandler(async (req, res, next) => {
     const { userId } = req.params;
+    
     try {
         const user = await UserModel.findById(userId);
         if (!user) {
             throw new NotFoundError("User not found!");
         }
+
         const cart = await CartModel.findOne({ userId });
         if (!cart || cart.products.length === 0) {
             throw new NotFoundError("No items in cart!");
         }
+
         // Retrieve additional product details using the product IDs in the cart
         const populatedProducts = await Promise.all(cart.products.map(async (cartProduct) => {
-            const productDetails = await ProductModel.findById(cartProduct.productId);
+            let productDetails;
+
+            // Check if the product exists in ProductModel
+            productDetails = await ProductModel.findById(cartProduct.productId);
+            
+            // If not found in ProductModel, check in FigureModel
+            if (!productDetails) {
+                productDetails = await AnimeFigureModel.findById(cartProduct.productId);
+            }
+
+            if (!productDetails) {
+                throw new NotFoundError(`Product with ID ${cartProduct.productId} not found in any model!`);
+            }
+
             return {
                 productId: cartProduct.productId,
                 quantity: cartProduct.quantity,
