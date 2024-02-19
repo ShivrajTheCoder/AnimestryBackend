@@ -2,16 +2,15 @@ const express = require("express");
 const router = express.Router();
 const { body, check } = require("express-validator");
 const {
-  placeOrder,
   getAllOrders,
   cancelOrder,
   getAllUserOrders,
-  paymentOrder,
-  saveAddress
+  createRzOrder,
+  markAsPayed
 } = require("../Controllers/orderController");
 const mongoose = require("mongoose");
 
-
+const cartProductSchema = require('../Models/cartProductSchema');
 
 
 router.get("/getallorders", getAllOrders);
@@ -29,16 +28,10 @@ router.get("/alluserorders/:userId", [
 // ], paymentOrder);
 
 router.post(
-  "/placeorder",
+  '/createorder',
   [
-    check("userId").exists().isMongoId(),
-    body('firstname').notEmpty().isString(),
-    body('lastname').notEmpty().isString(),
-    body('address').notEmpty().isString(),
-    body('building').notEmpty().isString(),
-    body('pincode').notEmpty().isString(),
-    body('city').notEmpty().isString(),
-    body('phonenumber').notEmpty().isString(),
+    body('address').exists().isMongoId(),
+    body('userId').exists().isMongoId(),
     body('products')
       .isArray()
       .custom((value) => {
@@ -48,7 +41,9 @@ router.post(
               mongoose.Types.ObjectId.isValid(item.productId) &&
               typeof item.quantity === 'number' &&
               item.quantity > 0 &&
-              typeof item.color === 'string' && item.color.length <= 6 // Added validation for color length
+              typeof item.color === 'string' &&
+              item.color.length <= 6 &&
+              cartProductSchema.path('size').enumValues.includes(item.size) // Check if size is valid
           )
         ) {
           return true;
@@ -57,9 +52,16 @@ router.post(
         }
       }),
   ],
-  saveAddress,
-  placeOrder
+  createRzOrder
 );
+
+router.post("/paymentsucess",
+  [ body("rzId").exists(),
+    body("userId").exists().isMongoId(),
+    body("orderId").exists().isMongoId(),
+  ],
+  markAsPayed
+)
 
 
 

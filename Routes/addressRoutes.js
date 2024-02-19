@@ -1,35 +1,35 @@
 const express = require("express");
 const { check, validationResult, body } = require("express-validator");
 const router = express.Router(); // Import the router object
-const {addAddress, getAllUserAddress, getAddressById, removeAddress, updateAddress} =require("../Controllers/addressController")
+const { addAddress, getAllUserAddress, getAddressById, removeAddress, updateAddress } = require("../Controllers/addressController")
 
 
 router.route("/saveaddress/:userId")
     .post([
         check("userId").exists().isMongoId(),
-        check("firstname").exists().notEmpty().withMessage("First name is required"),
-        check("lastname").exists().notEmpty().withMessage("Last name is required"),
-        check("address").exists().isLength({ min: 10 }).withMessage("Address must be at least 10 characters long"),
-        check("building").exists().notEmpty().withMessage("Building is required"),
-        check("pincode").exists().isNumeric().isLength({ min: 6, max: 6 }).withMessage("Pincode must be a 6-digit number"),
-        check("city").exists().notEmpty().withMessage("City is required"),
-        check("phonenumber").exists().isNumeric().isLength({ min: 10, max: 10 }).withMessage("Phone number must be a 10-digit number"),
-    ],addAddress);
+        body('firstname').notEmpty().isString(),
+        body('lastname').notEmpty().isString(),
+        body('address').notEmpty().isString(),
+        body('building').notEmpty().isString(),
+        body('pincode').notEmpty().isString(),
+        body('city').notEmpty().isString(),
+        body('phonenumber').notEmpty().isString(),
+    ], addAddress);
 
 router.route("/getalluseraddress/:userId")
     .get([
         check("userId").exists().isMongoId(),
-    ],getAllUserAddress);
+    ], getAllUserAddress);
 
 router.route("/getaddressbyid/:addId")
     .get([
         check("addId").exists().isMongoId(),
-    ],getAddressById);
+    ], getAddressById);
 
 router.route("/removeaddress/:addId")
     .delete([
         check("addId").exists().isMongoId(),
-    ],removeAddress);
+    ], removeAddress);
 
 router.route("/updateadd/:addId")
     .put([
@@ -41,6 +41,6 @@ router.route("/updateadd/:addId")
             }
             return true;
         })
-    ],updateAddress);
+    ], updateAddress);
 
 module.exports = router;

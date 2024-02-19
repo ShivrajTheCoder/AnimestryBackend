@@ -28,6 +28,7 @@ async function main() {
 }
 // import routes
 const { ErrorHandlerMiddleware } = require("./Middlewares/ErrorHandlerMiddleware");
+const DeadOrderRemover = require("./Utilities/DeadOrderRemover");
 // create application/json parser
 var jsonParser = bodyParser.json()
 
@@ -48,6 +49,7 @@ app.use("/admin",jsonParser,adminRouter);
 app.use("/figures",jsonParser,figureRouter);
 app.use("/address",jsonParser,addressRouter)
 app.use(ErrorHandlerMiddleware)
+DeadOrderRemover();
 app.listen(PORT,()=>{
     console.log("listening on port "+PORT);
 })

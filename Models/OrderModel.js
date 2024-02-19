@@ -1,21 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const cartProductSchema=require("./cartProductSchema");
 
-const cartProductSchema = new Schema({
-    productId: {
-        type: mongoose.Types.ObjectId,
-        ref: "Product",
-    },
-    quantity: {
-        type: Number,
-        default: 1,
-    },
-    color: {
-        type: String,
-        maxLength:6,
-        minLenght:6
-    },
-});
 
 const orderSchema = new Schema({
     products: [cartProductSchema],
@@ -42,6 +28,13 @@ const orderSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    paymentStatus:{
+        type:Boolean,
+        default:false,
+    },
+    rzId:{
+        type:String,
+    }
 });
 
 module.exports = mongoose.model("Order", orderSchema);
