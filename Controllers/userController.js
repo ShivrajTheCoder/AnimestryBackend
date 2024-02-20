@@ -4,9 +4,14 @@ const User = require("../Models/UserModel");
 const bcrypt = require("bcrypt");
 const { CredentialError } = require("../Utilities/CustomErrors");
 const jwt=require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 exp.Signup = RouterAsncErrorHandler(async (req, res, next) => {
     const { username, email, password } = req.body;
-
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     // Hash the password before saving it to the database
     const hashedPassword = await bcrypt.hash(password, 10); // 10 is the number of salt rounds
 
@@ -31,6 +36,11 @@ exp.Signup = RouterAsncErrorHandler(async (req, res, next) => {
 exp.Login = RouterAsncErrorHandler(async (req, res, next) => {
     const { email, password } = req.body;
     // console.log(req.body);
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const JWT_SECRET_KEY=process.env.JWT_SECRET_KEY;
     try {
         // Find the user by email

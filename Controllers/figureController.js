@@ -4,9 +4,15 @@ const Anime = require('../Models/AnimeFigureModel');
 const { DuplicateDataError, NotFoundError } = require('../Utilities/CustomErrors');
 const fs = require("fs");
 const { uploadImage } = require('../Utilities/aws/S3');
+const { validationResult } = require('express-validator');
 const exp = module.exports;
 
 exp.addFigure = RouterAsncErrorHandler(async (req, res,next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { name, anime, description } = req.body;
     const image = req.file;
     if (!name || !anime || !description) {
@@ -57,6 +63,11 @@ exp.addFigure = RouterAsncErrorHandler(async (req, res,next) => {
 
 exp.getFigure = RouterAsncErrorHandler(async (req, res) => {
     const figureId = req.params.id;
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const figure = await Anime.findById(figureId);
     if (!figure) {
         throw new Error("Figure not found");
@@ -64,6 +75,11 @@ exp.getFigure = RouterAsncErrorHandler(async (req, res) => {
     return res.status(200).json(figure);
 });
 exp.getAllFigures = RouterAsncErrorHandler(async (req, res) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const page = parseInt(req.query.page) || 1;
     const perPage = 8;
 
@@ -84,6 +100,11 @@ exp.getAllFigures = RouterAsncErrorHandler(async (req, res) => {
 });
 
 exp.updateFigure = RouterAsncErrorHandler(async (req, res) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const figureId = req.params.id;
     const { name, anime, image_url, other_images, description } = req.body;
     const updatedFigure = await Anime.findByIdAndUpdate(figureId, {
@@ -103,6 +124,11 @@ exp.updateFigure = RouterAsncErrorHandler(async (req, res) => {
 });
 
 exp.deleteFigure = RouterAsncErrorHandler(async (req, res) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const figureId = req.params.id;
     const deletedFigure = await Anime.findByIdAndUpdate(figureId,{active:false});
     if (!deletedFigure) {

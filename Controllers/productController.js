@@ -16,6 +16,11 @@ const isMobile = false; // This should be determined based on the request, assum
 const itemsPerPage = isMobile ? MOBILE_ITEMS_PER_PAGE : DESKTOP_ITEMS_PER_PAGE;
 
 exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     try {
         const page = parseInt(req.query.page) || 1;
         const products = await ProductModel.find({ active: true })
@@ -43,6 +48,11 @@ exp.GetAllProd = RouterAsncErrorHandler(async (req, res, next) => {
 
 
 exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     try {
         const trendingProducts = await ProductModel.find({active:true}).sort({ unitsSold: -1 }).limit(3);
         return res.status(200).json({
@@ -55,6 +65,11 @@ exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.GetProudctById = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { prodId } = req.params;
     try {
         const prod = await ProductModel.findById(prodId);
@@ -97,6 +112,11 @@ exp.UpdateProduct = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     // Validate fields
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { name, price, description, category, anime, colorOptions } = req.body;
 
     if (!req.file) {
@@ -152,7 +172,11 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
-    
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { name } = req.body;
     if(!name || name.length<2){
         return res.status(422).json({
@@ -188,6 +212,11 @@ exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.GetAllCategories = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 8; // Default limit of 8 items per page
@@ -225,6 +254,11 @@ exp.GetAllCategories = RouterAsncErrorHandler(async (req, res, next) => {
 
 
 exp.DeleteProduct = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { productId } = req.params;
     try {
         const deleted = await ProductModel.findByIdAndUpdate(productId,{active:false});
@@ -239,6 +273,11 @@ exp.DeleteProduct = RouterAsncErrorHandler(async (req, res, next) => {
 })
 
 exp.SearchProducts = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     try {
         const { name, category, anime } = req.query;
 

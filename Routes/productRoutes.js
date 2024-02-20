@@ -36,7 +36,7 @@ router.route("/updateprod/:prodId")
 
 router.route("/addproduct").post(upload.single('image'), AddProduct);
 
-router.route("/addnewcategory").post(upload.single("image"), AddNewCategory);
+router.route("/addnewcategory").post(AddNewCategory);
 
 router.route("/getallcategories")
     .get(GetAllCategories)

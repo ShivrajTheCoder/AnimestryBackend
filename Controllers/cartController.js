@@ -8,6 +8,11 @@ const { NotFoundError } = require("../Utilities/CustomErrors");
 const exp = module.exports;
 
 exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { productId, userId, quantity, color, size, figure = false } = req.body;
     try {
         let product;
@@ -66,6 +71,11 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
 
 
 exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { productId } = req.params;
     // console.log(req.body)
     const {figure,complete}=req.body;
@@ -131,6 +141,11 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
 
 // getUserCart
 exp.getUserCart = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { userId } = req.params;
     
     try {

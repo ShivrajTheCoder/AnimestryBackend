@@ -16,7 +16,11 @@ var instance = new Razorpay({
 });
 
 exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
-
+  const errors = validationResult(req);
+  // console.log(errors);
+  if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+  }
   const { products, userId, address } = req.body;
   const savedAddress=address;
   // console.log(products);
@@ -76,8 +80,13 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.markAsPayed=RouterAsncErrorHandler(async(req,res,next)=>{
+  const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
   const {orderId,userId,rzId}=req.body;
-  console.log(req.body);
+  // console.log(req.body);
   try{
     const payed=await OrderModel.findOneAndUpdate({_id:orderId,userId,rzId},{paymentStatus:true},{
       new:true
@@ -96,6 +105,11 @@ exp.markAsPayed=RouterAsncErrorHandler(async(req,res,next)=>{
   }
 })
 exp.getAllOrders = RouterAsncErrorHandler(async (req, res, next) => {
+  const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
   try {
     const orders = await Order.find({paymentStatus:true});
     if (orders.length > 0) {
@@ -112,6 +126,11 @@ exp.getAllOrders = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.getAllUserOrders = RouterAsncErrorHandler(async (req, res, next) => {
+  const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
   const { userId } = req.params;
   try {
     const user = await User.findById(userId);
@@ -133,6 +152,11 @@ exp.getAllUserOrders = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.cancelOrder = RouterAsncErrorHandler(async (req, res, next) => {
+  const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
   const { orderId } = req.body;
   try {
     // const canceled = await Order.findByIdAndDelete(orderId);

@@ -1,6 +1,17 @@
 const mongoose=require("mongoose");
 const Schema=mongoose.Schema;
 
+const subCategorySchema=new Schema({
+    name:{
+        type:String,
+        required:true,
+        unique:true,
+    },
+    discount:{
+        type:Number
+    }
+})
+
 const categorySchema=new Schema({
     name:{
         type:String,
@@ -10,10 +21,7 @@ const categorySchema=new Schema({
     discount:{
         type:Number,
     },
-    image_url:{
-        type:String,
-        required:true
-    }
+    subcategories:[subCategorySchema]
 })
 
 module.exports=mongoose.model("Category",categorySchema);
