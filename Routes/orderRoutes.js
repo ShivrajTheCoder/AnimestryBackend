@@ -55,7 +55,7 @@ router.post(
   createRzOrder
 );
 
-router.post("/paymentsucess",
+router.post("/paymentsuccess",
   [ body("rzId").exists(),
     body("userId").exists().isMongoId(),
     body("orderId").exists().isMongoId(),

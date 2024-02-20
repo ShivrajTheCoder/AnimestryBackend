@@ -67,7 +67,7 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
     const savedOrder=await newOrder.save();
     return res.status(201).json({
       message:"Razorpay order created",
-      order:newOrder
+      order:savedOrder
     })
   }
   catch(error){
@@ -77,11 +77,15 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.markAsPayed=RouterAsncErrorHandler(async(req,res,next)=>{
   const {orderId,userId,rzId}=req.body;
-  // console.log(req.body);
+  console.log(req.body);
   try{
     const payed=await OrderModel.findOneAndUpdate({_id:orderId,userId,rzId},{paymentStatus:true},{
       new:true
     });
+    if(!payed){
+      throw new NotFoundError("Order not found!");
+    }
+    await CartModel.findOneAndRemove({userId});
     return res.status(200).json({
       message:"Payed",
       order:payed
