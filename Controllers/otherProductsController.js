@@ -1,13 +1,13 @@
 
 const { RouterAsncErrorHandler } = require('../Middlewares/ErrorHandlerMiddleware');
-const Anime = require('../Models/AnimeFigureModel');
+const OtherProducts = require('../Models/OtherProducts');
 const { DuplicateDataError, NotFoundError } = require('../Utilities/CustomErrors');
 const fs = require("fs");
 const { uploadImage } = require('../Utilities/aws/S3');
 const { validationResult } = require('express-validator');
 const exp = module.exports;
 
-exp.addFigure = RouterAsncErrorHandler(async (req, res,next) => {
+exp.addOtherProduct = RouterAsncErrorHandler(async (req, res,next) => {
     const errors = validationResult(req);
     // console.log(errors);
     if (!errors.isEmpty()) {
@@ -27,7 +27,7 @@ exp.addFigure = RouterAsncErrorHandler(async (req, res,next) => {
     }
     if (anime.trim().length === 0) {
         return res.status(422).json({
-            message: "Anime name cannot be empty",
+            message: "OtherProducts name cannot be empty",
         });
     }
     if (description.trim().length < 25) {
@@ -36,20 +36,20 @@ exp.addFigure = RouterAsncErrorHandler(async (req, res,next) => {
         });
     }
     try {
-        const existing = await Anime.find({ name });
+        const existing = await OtherProducts.find({ name });
         if (existing.lenght > 0) {
             throw new DuplicateDataError("Figure Exisits");
         }
         const response = await uploadImage(req.file, name);
         const image_url = response.Location;
-        const newFig = new Anime({
+        const newOtherProduct = new OtherProducts({
             ...req.body, image_url
         })
-        const fig = await newFig.save();
+        const newOtherPro = await newOtherProduct.save();
         fs.unlinkSync(req.file.path);
         return res.status(201).json({
             message: "New figure added",
-            figure: fig,
+            product: newOtherPro,
         });
     }
     catch (error) {
@@ -61,20 +61,23 @@ exp.addFigure = RouterAsncErrorHandler(async (req, res,next) => {
 });
 
 
-exp.getFigure = RouterAsncErrorHandler(async (req, res) => {
-    const figureId = req.params.id;
+exp.getOtherProductById = RouterAsncErrorHandler(async (req, res) => {
+    const productId = req.params.id;
     const errors = validationResult(req);
     // console.log(errors);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const figure = await Anime.findById(figureId);
+    const figure = await OtherProducts.findById(figureId);
     if (!figure) {
         throw new Error("Figure not found");
     }
-    return res.status(200).json(figure);
+    return res.status(200).json({
+        message:"Product Found!",
+        product:figure
+    });
 });
-exp.getAllFigures = RouterAsncErrorHandler(async (req, res) => {
+exp.getAllOtherProducts = RouterAsncErrorHandler(async (req, res) => {
     const errors = validationResult(req);
     // console.log(errors);
     if (!errors.isEmpty()) {
@@ -83,23 +86,23 @@ exp.getAllFigures = RouterAsncErrorHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const perPage = 8;
 
-    const figures = await Anime.find({active:true})
+    const figures = await OtherProducts.find({active:true})
         .skip((page - 1) * perPage)
         .limit(perPage);
 
-    const totalFigures = await Anime.countDocuments();
+    const totalFigures = await OtherProducts.countDocuments();
     const totalPages = Math.ceil(totalFigures / perPage);
     if(figures.length<1){
         throw new NotFoundError("Figures not found!");
     }
     return res.status(200).json({
-        figures,
+        otherproducts:figures,
         currentPage: page,
         totalPages
     });
 });
 
-exp.updateFigure = RouterAsncErrorHandler(async (req, res) => {
+exp.updateOtherProduct = RouterAsncErrorHandler(async (req, res) => {
     const errors = validationResult(req);
     // console.log(errors);
     if (!errors.isEmpty()) {
@@ -107,35 +110,35 @@ exp.updateFigure = RouterAsncErrorHandler(async (req, res) => {
     }
     const figureId = req.params.id;
     const { name, anime, image_url, other_images, description } = req.body;
-    const updatedFigure = await Anime.findByIdAndUpdate(figureId, {
+    const updatedProduct = await OtherProducts.findByIdAndUpdate(figureId, {
         name,
         anime,
         image_url,
         other_images,
         description
     }, { new: true });
-    if (!updatedFigure) {
-        throw new Error("Figure not found");
+    if (!updatedProduct) {
+        throw new Error("Other Product not found");
     }
     return res.status(200).json({
-        message: "Figure Updated",
-        figure: updatedFigure
+        message: "Prouct Updated",
+        updatedProduct
     });
 });
 
-exp.deleteFigure = RouterAsncErrorHandler(async (req, res) => {
+exp.deleteOtherProduct = RouterAsncErrorHandler(async (req, res) => {
     const errors = validationResult(req);
     // console.log(errors);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const figureId = req.params.id;
-    const deletedFigure = await Anime.findByIdAndUpdate(figureId,{active:false});
-    if (!deletedFigure) {
+    const productId = req.params.id;
+    const deletedProduct = await OtherProducts.findByIdAndUpdate(productId,{active:false});
+    if (!deletedProduct) {
         throw new Error("Figure not found");
     }
     return res.status(200).json({
         message: "Figure Deleted",
-        figure: deletedFigure
+        product:deletedProduct
     });
 });

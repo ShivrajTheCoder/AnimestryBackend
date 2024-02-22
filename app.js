@@ -16,7 +16,7 @@ const userRouter=require("./Routes/userRoutes");
 const reviewRouter=require("./Routes/reviewRoutes");
 const cartRouter=require("./Routes/cartRoutes");
 const adminRouter=require("./Routes/adminRoutes");
-const figureRouter=require("./Routes/figureRoutes");
+const otherProductsRouter=require("./Routes/otherProductsRoutes");
 const addressRouter=require("./Routes/addressRoutes");
 main().catch(err => console.log(err));
 async function main() {
@@ -46,7 +46,7 @@ app.use("/user",jsonParser,userRouter);
 app.use("/review",jsonParser,reviewRouter);
 app.use("/cart",jsonParser,urlencodedParser,cartRouter);
 app.use("/admin",jsonParser,adminRouter);
-app.use("/figures",jsonParser,figureRouter);
+app.use("/otherproducts",jsonParser,otherProductsRouter);
 app.use("/address",jsonParser,addressRouter)
 app.use(ErrorHandlerMiddleware)
 DeadOrderRemover();

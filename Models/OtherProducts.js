@@ -1,7 +1,7 @@
 const mongoose=require("mongoose");
 const Schema=mongoose.Schema;
 
-const animeFigureSchema=new Schema({
+const otherProductsSchema=new Schema({
     name:{
         type:String,
         required:true,
@@ -14,10 +14,6 @@ const animeFigureSchema=new Schema({
     image_url:{
         type:String,
         required:true,
-    },
-    other_images:{
-        type:[String],
-        default:[]
     },
     description:{
         type:String,
@@ -39,4 +35,4 @@ const animeFigureSchema=new Schema({
     }
 })
 
-module.exports=mongoose.model("Anime",animeFigureSchema);
+module.exports=mongoose.model("OtherProducts",otherProductsSchema);

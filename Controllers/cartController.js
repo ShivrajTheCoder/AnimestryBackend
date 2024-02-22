@@ -1,5 +1,5 @@
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
-const AnimeFigureModel = require("../Models/AnimeFigureModel");
+const OtherProducts= require("../Models/OtherProducts");
 const CartModel = require("../Models/CartModel");
 const ProductModel = require("../Models/ProductModel");
 const UserModel = require("../Models/UserModel");
@@ -13,19 +13,19 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { productId, userId, quantity, color, size, figure = false } = req.body;
+    const { productId, userId, quantity, color, size, other = false } = req.body;
     try {
         let product;
-        if (figure) {
+        if (other) {
             // If the product is a figure, use the FigureModel
-            product = await AnimeFigureModel.findById(productId);
+            product = await OtherProducts.findById(productId);
         } else {
             // Otherwise, use the ProductModel
             product = await ProductModel.findById(productId);
         }
 
         const user = await UserModel.findById(userId);
-        console.log(user,product);
+        // console.log(user,product);
         if (!product || !user) {
             throw new NotFoundError("Product or User not found!");
         }
@@ -78,14 +78,14 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
     }
     const { productId } = req.params;
     // console.log(req.body)
-    const {figure,complete}=req.body;
+    const {other,complete}=req.body;
     const userId = '65c114022931680e9a1531ed';
     // console.log(productId,figure)
     try {
         let product=null;
-        if (figure) {
+        if (other) {
             // If figure is true, use FigureModel to find the product
-            product =await AnimeFigureModel.findById(productId);
+            product =await OtherProducts.findById(productId);
         } else {
             // Otherwise, use ProductModel
             product =await ProductModel.findById(productId);
@@ -168,7 +168,7 @@ exp.getUserCart = RouterAsncErrorHandler(async (req, res, next) => {
             
             // If not found in ProductModel, check in FigureModel
             if (!productDetails) {
-                productDetails = await AnimeFigureModel.findById(cartProduct.productId);
+                productDetails = await OtherProducts.findById(cartProduct.productId);
             }
 
             if (!productDetails) {
@@ -179,7 +179,7 @@ exp.getUserCart = RouterAsncErrorHandler(async (req, res, next) => {
                 productId: cartProduct.productId,
                 quantity: cartProduct.quantity,
                 color: cartProduct.color,
-                figure:cartProduct.figure,
+                other:cartProduct.other,
                 size: cartProduct.size,
                 name: productDetails.name,
                 price: productDetails.price,

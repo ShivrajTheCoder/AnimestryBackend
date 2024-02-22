@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
-const { getAllFigures, deleteFigure, updateFigure, getFigure, addFigure } = require('../Controllers/figureController');
-const multer = require('multer')
+const multer = require('multer');
+const { addOtherProduct, getOtherProductById, updateOtherProduct, deleteOtherProduct, getAllOtherProducts } = require('../Controllers/otherProductsController');
 const upload = multer({ dest: 'uploads/' })
 
 const router = express.Router();
@@ -21,19 +21,19 @@ const validate = (validations) => {
     };
 };
 
-router.post('/addnewfigure',
+router.post('/addnewotherproduct',
     upload.single("image"),
-    addFigure
+    addOtherProduct
 );
 
-router.get('/getfigurebyid/:id',
+router.get('/getotherproductbyid/:id',
     validate([
         param('id').notEmpty().isMongoId()
     ]),
-    getFigure
+    getOtherProductById
 );
 
-router.put('/updatefigure/:id',
+router.put('/updateotherprouct/:id',
     validate([
         param('id').notEmpty().isMongoId(),
         body('name').optional(),
@@ -41,18 +41,18 @@ router.put('/updatefigure/:id',
         body('image_url').optional(),
         body('description').optional().isLength({ min: 25 })
     ]),
-    updateFigure
+    updateOtherProduct
 );
 
-router.delete('/deletefigure/:id',
+router.delete('/deleteotherproduct/:id',
     validate([
         param('id').notEmpty().isMongoId()
     ]),
-    deleteFigure
+    deleteOtherProduct
 );
 
-router.get('/getallfigures',
-    getAllFigures
+router.get('/getallotherproducts',
+    getAllOtherProducts
 );
 
 module.exports = router;

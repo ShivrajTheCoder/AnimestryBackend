@@ -207,23 +207,7 @@ exp.GetAllCategories = RouterAsncErrorHandler(async (req, res, next) => {
         return res.status(422).json({ errors: errors.array() });
     }
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 8; // Default limit of 8 items per page
-
-        const categories = await CategoryModel.find({})
-            .skip((page - 1) * limit)
-            .limit(limit);
-
-        const totalCategories = await CategoryModel.countDocuments({});
-
-        const totalPages = Math.ceil(totalCategories / limit);
-
-        const paginationInfo = {
-            currentPage: page,
-            totalPages,
-            totalCategories
-        };
-        // console.log(totalPages,totalCategories);
+        const categories = await CategoryModel.find({});
 
         // If there are no categories found, throw an error
         if (categories.length < 1) {
@@ -232,8 +216,7 @@ exp.GetAllCategories = RouterAsncErrorHandler(async (req, res, next) => {
 
         return res.status(200).json({
             message: "Categories found!",
-            categories,
-            paginationInfo
+            categories
         });
     } catch (error) {
         next(error);
