@@ -183,30 +183,19 @@ exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
             message:"Invalid name"
         })
     }
-    if(!req.file){
-        return res.status(422).json({
-            message:"No image chosen",
-        })
-    }
     try {
         const category = await CategoryModel.find({ name });
         if (category.length > 0) {
             throw new DuplicateDataError();
         }
-        const response=await uploadImage(req.file,name);
-        const image_url=response.Location;
-        const newCat = new CategoryModel({name,image_url});
+        const newCat = new CategoryModel({name});
         // console.log(newCat);
         const cat = await newCat.save();
-        fs.unlinkSync(req.file.path);
         return res.status(201).json({
             message: "New Category added",
             category: cat,
         });
     } catch (error) {
-        if (req.file) {
-            fs.unlinkSync(req.file.path);
-        }
         next(error);
     }
 });
