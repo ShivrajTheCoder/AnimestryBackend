@@ -7,44 +7,49 @@ const { uploadImage } = require('../Utilities/aws/S3');
 const { validationResult } = require('express-validator');
 const exp = module.exports;
 
-exp.addOtherProduct = RouterAsncErrorHandler(async (req, res,next) => {
+exp.addOtherProduct = RouterAsncErrorHandler(async (req, res, next) => {
     const errors = validationResult(req);
-    // console.log(errors);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { name, anime, description } = req.body;
+    
+    const { name, anime, description, category } = req.body; // Extract category from request body
     const image = req.file;
-    if (!name || !anime || !description) {
+
+    if (!name || !anime || !description || !category) { // Check if category is provided
         return res.status(422).json({
-            message: "Name, anime, and description are required fields",
+            message: "Name, anime, description, and category are required fields",
         });
     }
-    if (name.trim().length === 0) {
+
+    if (name.trim().length === 0 || anime.trim().length === 0) {
         return res.status(422).json({
-            message: "Name cannot be empty",
+            message: "Name and anime cannot be empty",
         });
     }
-    if (anime.trim().length === 0) {
-        return res.status(422).json({
-            message: "OtherProducts name cannot be empty",
-        });
-    }
+
     if (description.trim().length < 25) {
         return res.status(422).json({
             message: "Description must be at least 25 characters long",
         });
     }
+
     try {
         const existing = await OtherProducts.find({ name });
-        if (existing.lenght > 0) {
-            throw new DuplicateDataError("Other Product Exisits");
+        if (existing.length > 0) {
+            throw new DuplicateDataError("Other Product Exists");
         }
+        
         const response = await uploadImage(req.file, name);
         const image_url = response.Location;
+        
+        // Save other product with category included
         const newOtherProduct = new OtherProducts({
-            ...req.body, image_url
-        })
+            ...req.body,
+            image_url,
+            category // Include category in the new other product object
+        });
+        
         const newOtherPro = await newOtherProduct.save();
         fs.unlinkSync(req.file.path);
         return res.status(201).json({
@@ -59,6 +64,7 @@ exp.addOtherProduct = RouterAsncErrorHandler(async (req, res,next) => {
         next(error);
     }
 });
+
 
 
 exp.getOtherProductById = RouterAsncErrorHandler(async (req, res) => {

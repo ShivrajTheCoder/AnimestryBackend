@@ -290,3 +290,29 @@ exp.SearchProducts = RouterAsncErrorHandler(async (req, res, next) => {
         next(error);
     }
 });
+
+exp.AddDiscount = RouterAsncErrorHandler(async(req, res, next) => {
+    const { productId } = req.params;
+    const { discount } = req.body;
+    if(discount>75 || discount<0){
+        return res.status(422).json({
+            message:"Dicount can't be greater than 75% or less than 0"
+        })
+    }
+    try {
+        // Check if the product is in Products or OtherProducts model
+        const productToUpdate = await ProductModel.findById(productId) || await OtherProducts.findById(productId);
+
+        if (!productToUpdate) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        // Update the discount value
+        productToUpdate.discount = discount;
+        const updatedProduct = await productToUpdate.save();
+
+        return res.status(200).json({ message: 'Discount added successfully', updatedProduct });
+    } catch (error) {
+        next(error);
+    }
+});

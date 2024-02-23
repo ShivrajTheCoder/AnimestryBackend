@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
 const productSchema = new Schema({
     name: {
         type: String,
@@ -40,7 +39,18 @@ const productSchema = new Schema({
     active:{
         type:Boolean,
         default:true,
+    },
+    discount: {
+        type: Number,
+        default: 0,
+        validate: {
+            validator: function(value) {
+                return value >= 0 && value <= 75;
+            },
+            message: props => `${props.value} is not a valid discount. Discount must be between 0 and 75.`
+        }
     }
 });
+
 
 module.exports = mongoose.model("Product", productSchema);
