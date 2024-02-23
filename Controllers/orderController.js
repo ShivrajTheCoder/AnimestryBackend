@@ -1,8 +1,8 @@
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
-const Address = require("../Models/AddressModel");
 const CartModel = require("../Models/CartModel");
 const Order = require("../Models/OrderModel");
-const Product = require("../Models/ProductModel"); // Import ProductModel
+const Product = require("../Models/ProductModel"); 
+const OtherProduct=require("../Models/OtherProducts");
 const User = require("../Models/UserModel");
 const { CustomError, NotFoundError } = require("../Utilities/CustomErrors");
 const { validationResult } = require("express-validator");
@@ -17,33 +17,43 @@ var instance = new Razorpay({
 
 exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
-  // console.log(errors);
   if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
+    return res.status(422).json({ errors: errors.array() });
   }
+
   const { products, userId, address } = req.body;
-  const savedAddress=address;
-  // console.log(products);
+  const savedAddress = address;
+  console.log(req.body);
   try {
+    // Separate products by model type
+    const productIds = products.map(p => p.productId);
+    const productData = await Product.find({ _id: { $in: productIds } });
+    const otherProductData = await OtherProduct.find({ _id: { $in: productIds } });
+
     // Check if all products are valid
-    const productData = await Product.find({ _id: { $in: products.map(p => p.productId) } });
-    if (productData.length !== products.length) {
+    if (productData.length + otherProductData.length !== products.length) {
       throw new CustomError(400, "Some products are invalid", "Invalid");
     }
 
     // Calculate total amount
     let totalAmount = 0;
-    const tax=0.1;
+    const tax = 0.1;
     products.forEach(product => {
       const matchedProduct = productData.find(p => p._id.toString() === product.productId.toString());
-      totalAmount += matchedProduct.price * product.quantity;
+      if (matchedProduct) {
+        totalAmount += matchedProduct.price * product.quantity;
+      } else {
+        const matchedOtherProduct = otherProductData.find(p => p._id.toString() === product.productId.toString());
+        totalAmount += matchedOtherProduct.price * product.quantity;
+      }
     });
+
     const options = {
-      amount: (totalAmount*(1+tax))*100,
+      amount: (totalAmount * (1 + tax)) * 100,
       currency: "INR"
-    }
-    // Create a new order
-    
+    };
+
+    // Create a new order with Razorpay
     let rz_orderId = "";
     try {
       const order = await new Promise((resolve, reject) => {
@@ -51,7 +61,6 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
           if (err) {
             reject(new Error("Something went wrong with Razorpay!"));
           } else {
-            // console.log(order.id);
             resolve(order);
           }
         });
@@ -60,24 +69,26 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
     } catch (err) {
       throw new CustomError(500, err.message, "Razorpay Error");
     }
+
+    // Save the order
     const newOrder = new Order({
       products,
       amount: totalAmount,
       userId,
       address: savedAddress,
-      rzId:rz_orderId
+      rzId: rz_orderId
     });
-    // console.log(newOrder)
-    const savedOrder=await newOrder.save();
+    const savedOrder = await newOrder.save();
+
     return res.status(201).json({
-      message:"Razorpay order created",
-      order:savedOrder
-    })
-  }
-  catch(error){
+      message: "Razorpay order created",
+      order: savedOrder
+    });
+  } catch (error) {
     next(error);
   }
 });
+
 
 exp.markAsPayed=RouterAsncErrorHandler(async(req,res,next)=>{
   const errors = validationResult(req);

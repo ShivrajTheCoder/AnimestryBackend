@@ -8,6 +8,7 @@ router.route("/addreview")
         body("description").exists(),
         body("productId").exists(),
         body("userId").exists(),
+        body("other").optional(),
     ],addReview);
 
 router.route("/deletereview/:reviewId")

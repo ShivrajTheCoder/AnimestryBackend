@@ -38,7 +38,7 @@ exp.addOtherProduct = RouterAsncErrorHandler(async (req, res,next) => {
     try {
         const existing = await OtherProducts.find({ name });
         if (existing.lenght > 0) {
-            throw new DuplicateDataError("Figure Exisits");
+            throw new DuplicateDataError("Other Product Exisits");
         }
         const response = await uploadImage(req.file, name);
         const image_url = response.Location;
@@ -70,7 +70,7 @@ exp.getOtherProductById = RouterAsncErrorHandler(async (req, res) => {
     }
     const product = await OtherProducts.findById(productId);
     if (!product) {
-        throw new Error("Figure not found");
+        throw new Error("Other Product not found");
     }
     return res.status(200).json({
         message:"Product Found!",
@@ -135,10 +135,10 @@ exp.deleteOtherProduct = RouterAsncErrorHandler(async (req, res) => {
     const productId = req.params.id;
     const deletedProduct = await OtherProducts.findByIdAndUpdate(productId,{active:false});
     if (!deletedProduct) {
-        throw new Error("Figure not found");
+        throw new Error("Other Product not found");
     }
     return res.status(200).json({
-        message: "Figure Deleted",
+        message: "Other Product Deleted",
         product:deletedProduct
     });
 });
