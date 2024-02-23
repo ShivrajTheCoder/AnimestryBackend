@@ -19,7 +19,7 @@ const cartProductSchema = new Schema({
         enum: ['XS', 'S', 'M', 'L', 'XL'],
         required: true,
     },
-    figure:{
+    other:{
         type:Boolean,
         default:false,
         required:true

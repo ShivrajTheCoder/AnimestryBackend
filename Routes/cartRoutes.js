@@ -6,15 +6,15 @@ const router = express.Router();
 router.route("/addtocart").post([
     body("userId").exists().isMongoId(),
     body("productId").exists().isMongoId(),
-    body("color").exists().isString(),
-    body("size").exists().isIn(['XS', 'S', 'M', 'L', 'XL']),
-    body("quantity").exists().isInt({ min: 1 }), // Add quantity validation
-    body("figure").optional().isBoolean()
+    body("color").optional().isString(),
+    body("size").optional().isIn(['XS', 'S', 'M', 'L', 'XL']),
+    body("quantity").optional().isInt({ min: 1 }), // Add quantity validation
+    body("other").optional().isBoolean()
 ], addToCart);
 
 router.route("/removefromcart/:productId").post([
     check("productId").exists().isMongoId(),
-    body("figure").optional().isBoolean(),
+    body("other").optional().isBoolean(),
     body("complete").optional().isBoolean(),
 ], removeFromCart);
 

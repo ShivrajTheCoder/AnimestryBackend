@@ -48,7 +48,7 @@ exp.addOtherProduct = RouterAsncErrorHandler(async (req, res,next) => {
         const newOtherPro = await newOtherProduct.save();
         fs.unlinkSync(req.file.path);
         return res.status(201).json({
-            message: "New figure added",
+            message: "New product added",
             product: newOtherPro,
         });
     }
@@ -68,13 +68,13 @@ exp.getOtherProductById = RouterAsncErrorHandler(async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const figure = await OtherProducts.findById(figureId);
-    if (!figure) {
+    const product = await OtherProducts.findById(productId);
+    if (!product) {
         throw new Error("Figure not found");
     }
     return res.status(200).json({
         message:"Product Found!",
-        product:figure
+        product:product
     });
 });
 exp.getAllOtherProducts = RouterAsncErrorHandler(async (req, res) => {
@@ -108,9 +108,9 @@ exp.updateOtherProduct = RouterAsncErrorHandler(async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const figureId = req.params.id;
+    const productId = req.params.id;
     const { name, anime, image_url, other_images, description } = req.body;
-    const updatedProduct = await OtherProducts.findByIdAndUpdate(figureId, {
+    const updatedProduct = await OtherProducts.findByIdAndUpdate(productId, {
         name,
         anime,
         image_url,

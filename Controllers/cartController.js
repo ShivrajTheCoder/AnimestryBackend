@@ -4,20 +4,23 @@ const CartModel = require("../Models/CartModel");
 const ProductModel = require("../Models/ProductModel");
 const UserModel = require("../Models/UserModel");
 const { NotFoundError } = require("../Utilities/CustomErrors");
+const { validationResult } = require("express-validator");
 
 const exp = module.exports;
 
 exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
     const errors = validationResult(req);
     // console.log(errors);
+    // console.log("i ram")
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
     const { productId, userId, quantity, color, size, other = false } = req.body;
+    // console.log(req.body);
     try {
         let product;
         if (other) {
-            // If the product is a figure, use the FigureModel
+            // If the product is a other, use the FigureModel
             product = await OtherProducts.findById(productId);
         } else {
             // Otherwise, use the ProductModel
@@ -36,7 +39,7 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
             // If the cart doesn't exist, create a new one
             cart = new CartModel({
                 userId: userId,
-                products: [{ productId, quantity: quantity || 1, color, size }],
+                products: [{ productId, quantity: quantity || 1, color, size,other }],
             });
 
         } else {
@@ -52,7 +55,7 @@ exp.addToCart = RouterAsncErrorHandler(async (req, res, next) => {
                 }
             } else {
                 // If the product is not in the cart, add it
-                cart.products.push({ productId, quantity: quantity || 1, color, size,figure });
+                cart.products.push({ productId, quantity: quantity || 1, color, size,other });
             }
         }
 
@@ -79,12 +82,13 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
     const { productId } = req.params;
     // console.log(req.body)
     const {other,complete}=req.body;
+    console.log(req.body,req.params);
     const userId = '65c114022931680e9a1531ed';
-    // console.log(productId,figure)
+    // console.log(productId,other)
     try {
         let product=null;
         if (other) {
-            // If figure is true, use FigureModel to find the product
+            // If other is true, use FigureModel to find the product
             product =await OtherProducts.findById(productId);
         } else {
             // Otherwise, use ProductModel
