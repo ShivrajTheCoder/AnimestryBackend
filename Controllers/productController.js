@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
 const ProductModel = require("../Models/ProductModel");
+const OtherProducts = require("../Models/OtherProducts");
 const CategoryModel = require("../Models/CategoryModel");
 const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors");
 const Fuse = require("fuse.js");
@@ -54,7 +55,7 @@ exp.GetTrendingProd = RouterAsncErrorHandler(async (req, res, next) => {
         return res.status(422).json({ errors: errors.array() });
     }
     try {
-        const trendingProducts = await ProductModel.find({active:true}).sort({ unitsSold: -1 }).limit(3);
+        const trendingProducts = await ProductModel.find({ active: true }).sort({ unitsSold: -1 }).limit(3);
         return res.status(200).json({
             message: "Trending products",
             trendingProducts,
@@ -151,7 +152,7 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
         // console.log(response);
         const image_url = response.Location;
         const newProd = new ProductModel({
-            ...req.body, image_url,colorOptions:JSON.parse(colorOptions)
+            ...req.body, image_url, colorOptions: JSON.parse(colorOptions)
 
         });
         const savedPro = await newProd.save();
@@ -178,9 +179,9 @@ exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
         return res.status(422).json({ errors: errors.array() });
     }
     const { name } = req.body;
-    if(!name || name.length<2){
+    if (!name || name.length < 2) {
         return res.status(422).json({
-            message:"Invalid name"
+            message: "Invalid name"
         })
     }
     try {
@@ -188,7 +189,7 @@ exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
         if (category.length > 0) {
             throw new DuplicateDataError();
         }
-        const newCat = new CategoryModel({name});
+        const newCat = new CategoryModel({ name });
         // console.log(newCat);
         const cat = await newCat.save();
         return res.status(201).json({
@@ -233,7 +234,7 @@ exp.DeleteProduct = RouterAsncErrorHandler(async (req, res, next) => {
     }
     const { productId } = req.params;
     try {
-        const deleted = await ProductModel.findByIdAndUpdate(productId,{active:false});
+        const deleted = await ProductModel.findByIdAndUpdate(productId, { active: false });
         return res.status(200).json({
             message: "Product deleted",
             deleted
@@ -246,37 +247,46 @@ exp.DeleteProduct = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.SearchProducts = RouterAsncErrorHandler(async (req, res, next) => {
     const errors = validationResult(req);
-    // console.log(errors);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
+    
     try {
-        const { name, category, anime } = req.query;
+        const { name, category, anime } = req.body;
 
-        const allProducts = await ProductModel.find(); // Fetch all products for fuzzy search
+        // Fetch products from both ProductModel and OtherProducts
+        const productsFromProductModel = await ProductModel.find().populate('category', 'name');
+        const productsFromOtherProducts = await OtherProducts.find().populate('category', 'name');
+
+        // Combine products from both models
+        let allProducts = [...productsFromProductModel, ...productsFromOtherProducts];
 
         const fuseOptions = {
-            keys: ["name", "category", "anime"],
-            threshold: 0.4, // Adjust the threshold based on your preference
+            keys: ["name", "category.name", "anime"], // Include category name for searching
+            threshold: 0.3, // Adjust the threshold based on your preference
         };
 
         const fuse = new Fuse(allProducts, fuseOptions);
 
-        // Perform a fuzzy search for each parameter
-        const nameResults = name ? fuse.search(name) : allProducts;
-        const categoryResults = category ? fuse.search(category) : allProducts;
-        const animeResults = anime ? fuse.search(anime) : allProducts;
-
-        // Combine results to remove duplicates and maintain relevance
-        const combinedResults = Array.from(
-            new Set([...nameResults, ...categoryResults, ...animeResults])
-        );
+        let results = allProducts;
+        if (name) {
+            const nameResults = fuse.search(name);
+            results = results.filter(product => nameResults.some(result => result.item._id.toString() === product._id.toString()));
+        }
+        if (category) {
+            const categoryResults = fuse.search(category);
+            results = results.filter(product => categoryResults.some(result => result.item._id.toString() === product._id.toString()));
+        }
+        if (anime) {
+            const animeResults = fuse.search(anime);
+            results = results.filter(product => animeResults.some(result => result.item._id.toString() === product._id.toString()));
+        }
 
         return res.status(200).json({
-            results: combinedResults,
+            results,
             message: "Results found!"
-        })
+        });
     } catch (error) {
         next(error);
     }
-})
+});

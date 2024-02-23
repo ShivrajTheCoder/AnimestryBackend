@@ -46,9 +46,11 @@ router.route("/deleteproduct/:productId")
         check("productId").exists().isMongoId()
     ],DeleteProduct)
 
-router.route("/search/:query")
-    .get([
-        check("query").exists()
+router.route("/search")
+    .post([
+        body("name").optional(),
+        body("category").optional(),
+        body("anime").optional()
     ],SearchProducts)
 
 

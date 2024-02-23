@@ -7,6 +7,11 @@ const otherProductsSchema=new Schema({
         required:true,
         unique:true,
     },
+    category: {
+        type: mongoose.Schema.ObjectId,
+        required: true,
+        ref: "Category",
+    },
     anime:{
         type:String,
         required:true,
