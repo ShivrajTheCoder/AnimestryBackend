@@ -8,7 +8,6 @@ const Fuse = require("fuse.js");
 const { uploadImage } = require("../Utilities/aws/S3");
 const exp = module.exports;
 const fs = require("fs");
-const { response } = require("express");
 const MOBILE_ITEMS_PER_PAGE = 4;
 const DESKTOP_ITEMS_PER_PAGE = 8;
 

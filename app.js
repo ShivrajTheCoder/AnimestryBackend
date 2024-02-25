@@ -18,6 +18,7 @@ const cartRouter=require("./Routes/cartRoutes");
 const adminRouter=require("./Routes/adminRoutes");
 const otherProductsRouter=require("./Routes/otherProductsRoutes");
 const addressRouter=require("./Routes/addressRoutes");
+const codeRouter=require("./Routes/referalCodeRoutes");
 main().catch(err => console.log(err));
 async function main() {
   await mongoose.connect(DB_URL)
@@ -47,7 +48,8 @@ app.use("/review",jsonParser,reviewRouter);
 app.use("/cart",jsonParser,urlencodedParser,cartRouter);
 app.use("/admin",jsonParser,adminRouter);
 app.use("/otherproducts",jsonParser,otherProductsRouter);
-app.use("/address",jsonParser,addressRouter)
+app.use("/address",jsonParser,addressRouter);
+app.use("/referalcode",jsonParser,codeRouter);
 app.use(ErrorHandlerMiddleware)
 DeadOrderRemover();
 app.listen(PORT,()=>{
