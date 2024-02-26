@@ -190,7 +190,8 @@ exp.getUserCart = RouterAsncErrorHandler(async (req, res, next) => {
                 description: productDetails.description,
                 anime: productDetails.anime,
                 category: productDetails.category,
-                image_url: productDetails.image_url
+                image_url: productDetails.image_url,
+                discount:productDetails.discount,
             };
         }));
 

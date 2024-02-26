@@ -1,6 +1,6 @@
 const express = require("express");
 const { body, check } = require("express-validator");
-const { getCodeById, deactivateCode, addCode, getAllCode } = require("../Controllers/referalCodeConroller");
+const { getCodeById, deactivateCode, addCode, getAllCode, applyCode } = require("../Controllers/referalCodeConroller");
 const router = express.Router();
 
 router.route("/addcode")
@@ -20,7 +20,10 @@ router.route("/:codeId")
         check("codeId").exists().isMongoId(),
     ], deactivateCode)
 
-
+router.route("/apply")
+    .post([
+        body("code").exists().isString(),
+    ],applyCode)
 
 
 module.exports = router;

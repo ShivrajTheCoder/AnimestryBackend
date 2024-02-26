@@ -34,6 +34,10 @@ exp.addCode = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.deactivateCode = RouterAsncErrorHandler(async (req, res, next) => {
     const { codeId } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ message: "Validation failed", errors: errors.array() });
+    }
     try {
         const code = await Code.findById(codeId);
         if (!code) {
@@ -63,6 +67,10 @@ exp.getAllCode = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.getCodeById = RouterAsncErrorHandler(async (req, res, next) => {
     const { codeId } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ message: "Validation failed", errors: errors.array() });
+    }
     try {
         const code = await Code.findById(codeId);
         if (!code) {
@@ -73,3 +81,26 @@ exp.getCodeById = RouterAsncErrorHandler(async (req, res, next) => {
         next(error);
     }
 });
+
+exp.applyCode=RouterAsncErrorHandler(async(req,res,next)=>{
+    const {code}=req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ message: "Validation failed", errors: errors.array() });
+    }
+    try{
+        const foundC=await Code.findOne({code,isActive:true});
+        if(!foundC){
+            return res.status(422).json({
+                message:"Invalid Code",
+            })
+        }
+        return res.status(200).json({
+            message:"Code found!",
+            code:foundC
+        })
+    }
+    catch(error){
+        next(error);
+    }
+})

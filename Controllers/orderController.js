@@ -1,13 +1,15 @@
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
 const CartModel = require("../Models/CartModel");
+const Code=require("../Models/ReferalCodeModel");
 const Order = require("../Models/OrderModel");
-const Product = require("../Models/ProductModel"); 
-const OtherProduct=require("../Models/OtherProducts");
+const Product = require("../Models/ProductModel");
+const OtherProduct = require("../Models/OtherProducts");
 const User = require("../Models/UserModel");
 const { CustomError, NotFoundError } = require("../Utilities/CustomErrors");
 const { validationResult } = require("express-validator");
 const Razorpay = require("razorpay");
 const OrderModel = require("../Models/OrderModel");
+const calculateTotalAmount = require("../Utilities/CalculateDiscount");
 const exp = module.exports;
 
 var instance = new Razorpay({
@@ -15,15 +17,24 @@ var instance = new Razorpay({
   key_secret: process.env.RZORPAY_SECRET,
 });
 
+
 exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: errors.array() });
   }
 
-  const { products, userId, address } = req.body;
+  const { products, userId, address, codeId } = req.body;
+  let codediscount = null;
+  let referalCode = null;
+  if (codeId) {
+    referalCode = await Code.findOne({ _id:codeId, isActive: true });
+    if (referalCode) {
+      codediscount = referalCode.discount; // discount in percentage
+    }
+  }
   const savedAddress = address;
-  console.log(req.body);
+  // console.log(req.body,referalCode,codediscount);
   try {
     // Separate products by model type
     const productIds = products.map(p => p.productId);
@@ -35,21 +46,15 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
       throw new CustomError(400, "Some products are invalid", "Invalid");
     }
 
-    // Calculate total amount
-    let totalAmount = 0;
-    const tax = 0.1;
-    products.forEach(product => {
-      const matchedProduct = productData.find(p => p._id.toString() === product.productId.toString());
-      if (matchedProduct) {
-        totalAmount += matchedProduct.price * product.quantity;
-      } else {
-        const matchedOtherProduct = otherProductData.find(p => p._id.toString() === product.productId.toString());
-        totalAmount += matchedOtherProduct.price * product.quantity;
-      }
-    });
+    // Calculate total amount using the calculateTotalAmount function
+    const totalAmount = calculateTotalAmount(productData, otherProductData, products, codediscount);
+
+    const taxPercentage = 0.1; // 10% tax rate
+    const taxAmount = totalAmount * taxPercentage;
+    const totalAmountWithTax = totalAmount + taxAmount;
 
     const options = {
-      amount: (totalAmount * (1 + tax)) * 100,
+      amount: totalAmountWithTax * 100,
       currency: "INR"
     };
 
@@ -73,10 +78,11 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
     // Save the order
     const newOrder = new Order({
       products,
-      amount: totalAmount,
+      amount: (options.amount / 100),
       userId,
       address: savedAddress,
-      rzId: rz_orderId
+      rzId: rz_orderId,
+      codeId: codeId ? codeId : null // Save the codeId if exists, otherwise save null
     });
     const savedOrder = await newOrder.save();
 
@@ -90,39 +96,41 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 
-exp.markAsPayed=RouterAsncErrorHandler(async(req,res,next)=>{
+
+
+exp.markAsPayed = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
-    // console.log(errors);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-  const {orderId,userId,rzId}=req.body;
+  // console.log(errors);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+  const { orderId, userId, rzId } = req.body;
   // console.log(req.body);
-  try{
-    const payed=await OrderModel.findOneAndUpdate({_id:orderId,userId,rzId},{paymentStatus:true},{
-      new:true
+  try {
+    const payed = await OrderModel.findOneAndUpdate({ _id: orderId, userId, rzId }, { paymentStatus: true }, {
+      new: true
     });
-    if(!payed){
+    if (!payed) {
       throw new NotFoundError("Order not found!");
     }
-    await CartModel.findOneAndRemove({userId});
+    await CartModel.findOneAndRemove({ userId });
     return res.status(200).json({
-      message:"Payed",
-      order:payed
+      message: "Payed",
+      order: payed
     })
   }
-  catch(error){
+  catch (error) {
     next(error);
   }
 })
 exp.getAllOrders = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
-    // console.log(errors);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
+  // console.log(errors);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   try {
-    const orders = await Order.find({paymentStatus:true});
+    const orders = await Order.find({ paymentStatus: true });
     if (orders.length > 0) {
       return res.status(200).json({
         message: "Orders found",
@@ -138,10 +146,10 @@ exp.getAllOrders = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.getAllUserOrders = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
-    // console.log(errors);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
+  // console.log(errors);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   const { userId } = req.params;
   try {
     const user = await User.findById(userId);
@@ -149,7 +157,7 @@ exp.getAllUserOrders = RouterAsncErrorHandler(async (req, res, next) => {
       throw new NotFoundError("User Not Found");
     }
 
-    const userOrders = await Order.find({ userId ,paymentStatus:true});
+    const userOrders = await Order.find({ userId, paymentStatus: true });
     if (userOrders.length < 1) {
       throw new NotFoundError("No Order Found");
     }
@@ -164,10 +172,10 @@ exp.getAllUserOrders = RouterAsncErrorHandler(async (req, res, next) => {
 
 exp.cancelOrder = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
-    // console.log(errors);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
+  // console.log(errors);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   const { orderId } = req.body;
   try {
     // const canceled = await Order.findByIdAndDelete(orderId);

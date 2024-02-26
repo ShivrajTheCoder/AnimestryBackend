@@ -34,6 +34,10 @@ const orderSchema = new Schema({
     },
     rzId:{
         type:String,
+    },
+    code:{
+        type:mongoose.Types.ObjectId,
+        ref:"Code",
     }
 });
 
