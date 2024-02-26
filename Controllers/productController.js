@@ -281,14 +281,20 @@ exp.SearchProducts = RouterAsncErrorHandler(async (req, res, next) => {
             results = results.filter(product => animeResults.some(result => result.item._id.toString() === product._id.toString()));
         }
 
+        // Separate products from ProductModel and OtherProducts
+        const productsFromProductModelFiltered = results.filter(product => productsFromProductModel.some(p => p._id.toString() === product._id.toString()));
+        const productsFromOtherProductsFiltered = results.filter(product => productsFromOtherProducts.some(p => p._id.toString() === product._id.toString()));
+
         return res.status(200).json({
-            results,
+            clothes: productsFromProductModelFiltered,
+            others: productsFromOtherProductsFiltered,
             message: "Results found!"
         });
     } catch (error) {
         next(error);
     }
 });
+
 
 exp.AddDiscount = RouterAsncErrorHandler(async(req, res, next) => {
     const { productId } = req.params;
@@ -311,6 +317,33 @@ exp.AddDiscount = RouterAsncErrorHandler(async(req, res, next) => {
         const updatedProduct = await productToUpdate.save();
 
         return res.status(200).json({ message: 'Discount added successfully', updatedProduct });
+    } catch (error) {
+        next(error);
+    }
+});
+
+exp.GetByCategory = RouterAsncErrorHandler(async (req, res, next) => {
+    const { categoryId } = req.params;
+    try {
+        // Search for products in ProductModel
+        const productsFromProductModel = await ProductModel.find({ category: categoryId });
+
+        // Search for products in OtherProducts
+        const productsFromOtherProducts = await OtherProducts.find({ category: categoryId });
+
+        // Check if either of the arrays is empty, throw NotFoundError if both are empty
+        if (productsFromProductModel.length === 0 && productsFromOtherProducts.length === 0) {
+            throw new NotFoundError("No products found for the given category.");
+        }
+
+        // Send response with products separately
+        res.status(200).json({
+            message: "Items found!",
+            products: {
+                clothes:productsFromProductModel,
+                others:productsFromOtherProducts
+            }
+        });
     } catch (error) {
         next(error);
     }

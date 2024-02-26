@@ -1,6 +1,6 @@
 const express = require("express");
 const { check, body } = require("express-validator");
-const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd,GetAllCategories, DeleteProduct, SearchProducts, AddDiscount } = require("../Controllers/productController");
+const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd,GetAllCategories, DeleteProduct, SearchProducts, AddDiscount, GetByCategory } = require("../Controllers/productController");
 const { CustomError } = require("../Utilities/CustomErrors");
 const router = express.Router();
 const multer = require('multer')
@@ -58,5 +58,10 @@ router.route("/adddiscount/:productId")
         body("discount").exists().isNumeric(),
         check("productId").exists().isMongoId()
     ],AddDiscount)
+
+router.route("/getbycategory/:categoryId")
+    .get([
+        check("categoryId").exists().isMongoId(),
+    ],GetByCategory)
 
 module.exports = router;
