@@ -32,7 +32,7 @@ router.post(
   [
     body('address').exists().isMongoId(),
     body('userId').exists().isMongoId(),
-    body("codeId").optional().isMongoId(),
+    body("codeId").optional(),
     body('products')
       .isArray()
       .custom((value) => {

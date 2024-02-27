@@ -249,7 +249,7 @@ exp.SearchProducts = RouterAsncErrorHandler(async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    
+
     try {
         const { name, category, anime } = req.body;
 
@@ -296,12 +296,12 @@ exp.SearchProducts = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 
-exp.AddDiscount = RouterAsncErrorHandler(async(req, res, next) => {
+exp.AddDiscount = RouterAsncErrorHandler(async (req, res, next) => {
     const { productId } = req.params;
     const { discount } = req.body;
-    if(discount>75 || discount<0){
+    if (discount > 75 || discount < 0) {
         return res.status(422).json({
-            message:"Dicount can't be greater than 75% or less than 0"
+            message: "Dicount can't be greater than 75% or less than 0"
         })
     }
     try {
@@ -323,6 +323,10 @@ exp.AddDiscount = RouterAsncErrorHandler(async(req, res, next) => {
 });
 
 exp.GetByCategory = RouterAsncErrorHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     const { categoryId } = req.params;
     try {
         // Search for products in ProductModel
@@ -340,8 +344,8 @@ exp.GetByCategory = RouterAsncErrorHandler(async (req, res, next) => {
         res.status(200).json({
             message: "Items found!",
             products: {
-                clothes:productsFromProductModel,
-                others:productsFromOtherProducts
+                clothes: productsFromProductModel,
+                others: productsFromOtherProducts
             }
         });
     } catch (error) {
