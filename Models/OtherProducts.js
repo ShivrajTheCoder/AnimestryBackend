@@ -20,6 +20,11 @@ const otherProductsSchema=new Schema({
         type:String,
         required:true,
     },
+    other_images:[
+        {
+            type:"String"
+        }
+    ],
     description:{
         type:String,
         required:true,

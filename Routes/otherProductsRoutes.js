@@ -5,7 +5,7 @@ const { addOtherProduct, getOtherProductById, updateOtherProduct, deleteOtherPro
 const upload = multer({ dest: 'uploads/' })
 
 const router = express.Router();
-
+const multipleUpload = upload.fields([{ name: "image", maxCount: 1 }, { name: "otherimages", maxCount: 3 }])
 // Validation middleware
 
 const validate = (validations) => {
@@ -22,7 +22,7 @@ const validate = (validations) => {
 };
 
 router.post('/addnewotherproduct',
-    upload.single("image"),
+    multipleUpload,
     addOtherProduct
 );
 

@@ -118,8 +118,8 @@ const validateProduct = (req) => {
             message: "Image not present",
         }
     }
-    const { image, otherimages } = req.files;
-    if (!image || !otherimages || image.length < 1 || otherimages.length < 1) {
+    const { image } = req.files;
+    if (!image || image.length < 1) {
         return {
             failed: true,
             message: "Image not present",
@@ -149,7 +149,7 @@ const validateProduct = (req) => {
         failed: false
     }
 }
-
+// you have not search for the product if it exists
 exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     // Validate fields
     const errors = validationResult(req);
@@ -157,17 +157,18 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const {  colorOptions } = req.body;
+    const { colorOptions } = req.body;
     // console.log(req.files);
     const validation = validateProduct(req);
+    const { image, otherimages } = req.files;
     if (validation?.failed) {
         // console.log(validation);
+        removeFileFromLocal(image, otherimages);
         return res.status(422).json({
             message: validation.message
         })
     }
     // console.log(req.body, req.files);
-    const { image, otherimages } = req.files;
     if (!image || image.length < 1) {
         throw new CustomError(400, "Invalid Parameters", "Invalid");
     }
@@ -176,7 +177,7 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
         const response = await uploadImages(image);
         let otherResp;
         let other_images;
-        if (otherimages.length > 0) {
+        if (otherimages?.length > 0) {
             otherResp = await uploadImages(otherimages);
             other_images = otherResp.map((image) => image.Location);
         }
@@ -184,16 +185,11 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
         const image_url = response[0].Location;
         const newProd = new ProductModel({
             ...req.body, image_url, colorOptions: JSON.parse(colorOptions),
-            other_images: other_images ? other_images : [],
+            other_images: other_images?.length > 0 ? other_images : [],
         });
         const savedPro = await newProd.save();
         // console.log(savedPro);
-        fs.unlinkSync(image[0].path);
-        if (otherimages.length > 0) {
-            otherimages.forEach((image) => {
-                fs.unlinkSync(image.path);
-            })
-        }
+        removeFileFromLocal(image, otherimages);
         return res.status(201).json({
             message: 'Product added',
             product: savedPro
@@ -201,15 +197,9 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     }
     catch (error) {
         const { image, otherimages } = req.files;
-        fs.unlinkSync(image[0].path);
-        if (otherimages.length > 0) {
-            otherimages.forEach((image) => {
-                fs.unlinkSync(image.path);
-            })
-        }
+        removeFileFromLocal(image, otherimages);
         next(error);
     }
-
 });
 
 exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
