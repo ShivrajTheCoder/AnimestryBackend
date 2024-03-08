@@ -14,6 +14,11 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
+    other_images:[
+        {
+            type:String
+        }
+    ],
     category: {
         type: mongoose.Schema.ObjectId,
         required: true,

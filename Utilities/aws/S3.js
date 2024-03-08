@@ -34,8 +34,14 @@ function uploadImage(file, name) {
 // Upload multiple images
 async function uploadImages(files) {
   const promises = [];
+  if(!files || files.lenght <1){
+    return [];
+  }
   for (const file of files) {
-    const promise = uploadImage(file, file.name);
+    if(!file){
+      return [];
+    }
+    const promise = uploadImage(file, file.filename);
     promises.push(promise);
   }
   return Promise.all(promises);

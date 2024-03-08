@@ -5,7 +5,7 @@ const OtherProducts = require("../Models/OtherProducts");
 const CategoryModel = require("../Models/CategoryModel");
 const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors");
 const Fuse = require("fuse.js");
-const { uploadImage } = require("../Utilities/aws/S3");
+const { uploadImage, uploadImages } = require("../Utilities/aws/S3");
 const exp = module.exports;
 const fs = require("fs");
 const MOBILE_ITEMS_PER_PAGE = 4;
@@ -109,6 +109,46 @@ exp.UpdateProduct = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
+const validateProduct = (req) => {
+    const { name, price, description, category, anime, colorOptions } = req.body;
+    // console.log(req.body);
+    if (!req.files) {
+        return {
+            failed: true,
+            message: "Image not present",
+        }
+    }
+    const { image, otherimages } = req.files;
+    if (!image || !otherimages || image.length < 1 || otherimages.length < 1) {
+        return {
+            failed: true,
+            message: "Image not present",
+        }
+    }
+    if (!name || !price || !description || !category || !anime || !colorOptions) {
+        return {
+            failed: true,
+            message: "All fields are required",
+        }
+    }
+
+    if (description.length < 50) {
+        return {
+            failed: true,
+            message: "Description too short",
+        }
+    }
+
+    if (isNaN(price) || price <= 0) {
+        return {
+            failed: true,
+            message: "Price should be a number",
+        }
+    }
+    return {
+        failed: false
+    }
+}
 
 exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     // Validate fields
@@ -117,54 +157,55 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { name, price, description, category, anime, colorOptions } = req.body;
-
-    if (!req.file) {
+    const {  colorOptions } = req.body;
+    // console.log(req.files);
+    const validation = validateProduct(req);
+    if (validation?.failed) {
+        // console.log(validation);
         return res.status(422).json({
-            message: "Image not present",
-        });
+            message: validation.message
+        })
     }
-
-    if (!name || !price || !description || !category || !anime || !colorOptions) {
-        return res.status(422).json({
-            message: "All fields are mandatory",
-        });
+    // console.log(req.body, req.files);
+    const { image, otherimages } = req.files;
+    if (!image || image.length < 1) {
+        throw new CustomError(400, "Invalid Parameters", "Invalid");
     }
-
-    if (description.length < 50) {
-        return res.status(422).json({
-            message: "Description should be at least 50 characters long",
-        });
-    }
-
-    if (isNaN(price) || price <= 0) {
-        return res.status(422).json({
-            message: "Price should be a positive number",
-        });
-    }
-
-    // If all validations pass, proceed to the next steps
-    // console.log(req.file, req.body);
     try {
 
-        const response = await uploadImage(req.file, name);
-        // console.log(response);
-        const image_url = response.Location;
+        const response = await uploadImages(image);
+        let otherResp;
+        let other_images;
+        if (otherimages.length > 0) {
+            otherResp = await uploadImages(otherimages);
+            other_images = otherResp.map((image) => image.Location);
+        }
+        // console.log(response, otherResp);
+        const image_url = response[0].Location;
         const newProd = new ProductModel({
-            ...req.body, image_url, colorOptions: JSON.parse(colorOptions)
-
+            ...req.body, image_url, colorOptions: JSON.parse(colorOptions),
+            other_images: other_images ? other_images : [],
         });
         const savedPro = await newProd.save();
         // console.log(savedPro);
-        fs.unlinkSync(req.file.path);
+        fs.unlinkSync(image[0].path);
+        if (otherimages.length > 0) {
+            otherimages.forEach((image) => {
+                fs.unlinkSync(image.path);
+            })
+        }
         return res.status(201).json({
             message: 'Product added',
             product: savedPro
         });
     }
     catch (error) {
-        if (req.file) {
-            fs.unlinkSync(req.file.path);
+        const { image, otherimages } = req.files;
+        fs.unlinkSync(image[0].path);
+        if (otherimages.length > 0) {
+            otherimages.forEach((image) => {
+                fs.unlinkSync(image.path);
+            })
         }
         next(error);
     }

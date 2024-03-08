@@ -25,15 +25,11 @@ async function main() {
   .then(()=>{
     console.log("Connected to database");
   });
-  // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
 }
-// import routes
 const { ErrorHandlerMiddleware } = require("./Middlewares/ErrorHandlerMiddleware");
 const DeadOrderRemover = require("./Utilities/DeadOrderRemover");
-// create application/json parser
-var jsonParser = bodyParser.json()
 
-// create application/x-www-form-urlencoded parser
+var jsonParser = bodyParser.json()
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 // Middlewares

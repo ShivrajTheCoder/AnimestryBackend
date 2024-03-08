@@ -1,10 +1,23 @@
 const express = require("express");
 const { check, body } = require("express-validator");
-const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd,GetAllCategories, DeleteProduct, SearchProducts, AddDiscount, GetByCategory } = require("../Controllers/productController");
+const { GetTrendingProd, GetProudctById, UpdateProduct, AddProduct, AddNewCategory, GetAllProd, GetAllCategories, DeleteProduct, SearchProducts, AddDiscount, GetByCategory } = require("../Controllers/productController");
 const { CustomError } = require("../Utilities/CustomErrors");
 const router = express.Router();
-const multer = require('multer')
-const upload = multer({ dest: 'uploads/' })
+const multer = require('multer');
+const { uploadImages, uploadImage } = require("../Utilities/aws/S3");
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/') // Uploads folder where files will be stored
+    },
+    filename: function (req, file, cb) {
+        // Use original file name with a timestamp to avoid overwriting files with the same name
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+});
+// const upload = multer({ dest: 'uploads/' })
+const upload = multer({ storage: storage })
+const multipleUpload=upload.fields([{name:"image",maxCount:1},{name:"otherimages",maxCount:3}])
+
 router.route("/gettreandingproducts")
     .get(GetTrendingProd);
 
@@ -34,7 +47,7 @@ router.route("/updateprod/:prodId")
         body().custom(atLeastOne),
     ], UpdateProduct);
 
-router.route("/addproduct").post(upload.single('image'), AddProduct);
+router.route("/addproduct").post(multipleUpload, AddProduct);
 
 router.route("/addnewcategory").post(AddNewCategory);
 
@@ -44,24 +57,26 @@ router.route("/getallcategories")
 router.route("/deleteproduct/:productId")
     .delete([
         check("productId").exists().isMongoId()
-    ],DeleteProduct)
+    ], DeleteProduct)
 
 router.route("/search")
     .post([
         body("name").optional(),
         body("category").optional(),
         body("anime").optional()
-    ],SearchProducts)
+    ], SearchProducts)
 
 router.route("/adddiscount/:productId")
     .post([
         body("discount").exists().isNumeric(),
         check("productId").exists().isMongoId()
-    ],AddDiscount)
+    ], AddDiscount)
 
 router.route("/getbycategory/:categoryId")
     .get([
         check("categoryId").exists().isMongoId(),
-    ],GetByCategory)
+    ], GetByCategory)
+
+
 
 module.exports = router;
