@@ -51,7 +51,7 @@ exp.deactivateCode = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
-const itemsPerPage = 1; // You can adjust this value as needed
+const itemsPerPage = 3; // You can adjust this value as needed
 
 exp.getAllCode = RouterAsncErrorHandler(async (req, res, next) => {
     try {

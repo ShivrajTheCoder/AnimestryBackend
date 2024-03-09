@@ -125,24 +125,37 @@ exp.markAsPayed = RouterAsncErrorHandler(async (req, res, next) => {
 })
 exp.getAllOrders = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
-  // console.log(errors);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+      return res.status(422).json({ errors: errors.array() });
   }
+
   try {
-    const orders = await Order.find({ paymentStatus: true });
-    if (orders.length > 0) {
-      return res.status(200).json({
-        message: "Orders found",
-        orders,
-      });
-    } else {
-      throw new NotFoundError();
-    }
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = 5;
+      const skip = (page - 1) * pageSize;
+
+      const orders = await Order.find({ paymentStatus: true })
+          .skip(skip)
+          .limit(pageSize);
+
+      const totalOrders = await Order.countDocuments({ paymentStatus: true });
+      const totalPages = Math.ceil(totalOrders / pageSize);
+
+      if (orders.length > 0) {
+          return res.status(200).json({
+              message: "Orders found",
+              orders,
+              currentPage: page,
+              totalPages,
+          });
+      } else {
+          throw new NotFoundError("No orders found");
+      }
   } catch (error) {
-    next(error);
+      next(error);
   }
 });
+
 
 exp.getAllUserOrders = RouterAsncErrorHandler(async (req, res, next) => {
   const errors = validationResult(req);
