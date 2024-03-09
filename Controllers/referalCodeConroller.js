@@ -1,6 +1,6 @@
 const { RouterAsncErrorHandler } = require("../Middlewares/ErrorHandlerMiddleware");
-const Code=require("../Models/ReferalCodeModel");
-const exp=module.exports;
+const Code = require("../Models/ReferalCodeModel");
+const exp = module.exports;
 const { NotFoundError, DuplicateDataError } = require("../Utilities/CustomErrors");
 const { validationResult } = require("express-validator");
 
@@ -51,19 +51,31 @@ exp.deactivateCode = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
+const itemsPerPage = 1; // You can adjust this value as needed
+
 exp.getAllCode = RouterAsncErrorHandler(async (req, res, next) => {
     try {
-        const codes = await Code.find({isActive:true});
-        if(codes.length>0){
-            return res.status(200).json({ message: "Codes found!", codes });
-        }
-        else{
+        let page = parseInt(req.query.page) || 1;
+        let skip = (page - 1) * itemsPerPage;
+
+        const codes = await Code.find({ isActive: true })
+            .skip(skip)
+            .limit(itemsPerPage)
+            .exec();
+
+        const totalCodes = await Code.countDocuments({ isActive: true });
+
+        if (codes.length > 0) {
+            const totalPages = Math.ceil(totalCodes / itemsPerPage);
+            return res.status(200).json({ message: "Codes found!", codes, currentPage: page, totalPages });
+        } else {
             throw new NotFoundError("No codes found!");
         }
     } catch (error) {
         next(error);
     }
 });
+
 
 exp.getCodeById = RouterAsncErrorHandler(async (req, res, next) => {
     const { codeId } = req.params;
@@ -82,25 +94,25 @@ exp.getCodeById = RouterAsncErrorHandler(async (req, res, next) => {
     }
 });
 
-exp.applyCode=RouterAsncErrorHandler(async(req,res,next)=>{
-    const {code}=req.body;
+exp.applyCode = RouterAsncErrorHandler(async (req, res, next) => {
+    const { code } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ message: "Validation failed", errors: errors.array() });
     }
-    try{
-        const foundC=await Code.findOne({code,isActive:true});
-        if(!foundC){
+    try {
+        const foundC = await Code.findOne({ code, isActive: true });
+        if (!foundC) {
             return res.status(422).json({
-                message:"Invalid Code",
+                message: "Invalid Code",
             })
         }
         return res.status(200).json({
-            message:"Code found!",
-            code:foundC
+            message: "Code found!",
+            code: foundC
         })
     }
-    catch(error){
+    catch (error) {
         next(error);
     }
 })
