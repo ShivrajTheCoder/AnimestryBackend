@@ -52,8 +52,8 @@ exp.SendCode = async (req, res, next) => {
         if (!result) {
             return res.status(500).json({ message: 'Error sending verification code.' });
         }
-        console.log(savedCode);
-        res.status(201).json({ message: 'Verification code sent. with code', code: savedCode });// remove code 
+        // console.log(savedCode);
+        res.status(201).json({ message: 'Verification code sent. with code',  });// remove code 
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Error sending verification code.' });
@@ -94,7 +94,7 @@ exp.Signup = async (req, res, next) => {
         if (savedUser) {
             await Code.findOneAndDelete({ email });
         }
-        res.status(201).json({ message: 'User created successfully.', user: savedUser });
+        res.status(201).json({ message: 'User created successfully.', user: savedUser.email });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Error creating user.' });
