@@ -8,6 +8,7 @@ const Fuse = require("fuse.js");
 const { uploadImage, uploadImages } = require("../Utilities/aws/S3");
 const exp = module.exports;
 const fs = require("fs");
+const removeFileFromLocal = require("../Utilities/RemoveFileFromLocal");
 const MOBILE_ITEMS_PER_PAGE = 4;
 const DESKTOP_ITEMS_PER_PAGE = 8;
 
@@ -203,12 +204,8 @@ exp.AddProduct = RouterAsncErrorHandler(async (req, res, next) => {
 });
 
 exp.AddNewCategory = RouterAsncErrorHandler(async (req, res, next) => {
-    const errors = validationResult(req);
-    // console.log(errors);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
     const { name } = req.body;
+    // console.log(req.body);
     if (!name || name.length < 2) {
         return res.status(422).json({
             message: "Invalid name"

@@ -5,7 +5,7 @@ const { check } = require("express-validator");
 const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
 
 router.route("/dashinfo")
-    .get(adminAuthenticateToken,Dashboardinfo)
+    .get(Dashboardinfo)
 
 router.route("/login")
     .post([
