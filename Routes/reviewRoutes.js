@@ -4,8 +4,6 @@ const { deleteReview, getProductReview, addReview } = require("../Controllers/re
 const authenticateToken = require("../Middlewares/UserAuthMiddleware");
 const router=express.Router();
 
-const authenticateToken = require("../Middlewares/UserAuthMiddleware");
-
 router.route("/addreview")
     .post(authenticateToken,[
         body("description").exists(),
