@@ -3,6 +3,8 @@ const { body, param, validationResult } = require('express-validator');
 const multer = require('multer');
 const { addOtherProduct, getOtherProductById, updateOtherProduct, deleteOtherProduct, getAllOtherProducts } = require('../Controllers/otherProductsController');
 const upload = multer({ dest: 'uploads/' })
+const authenticateToken = require("../Middlewares/UserAuthMiddleware");
+const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
 
 const router = express.Router();
 const multipleUpload = upload.fields([{ name: "image", maxCount: 1 }, { name: "otherimages", maxCount: 3 }])

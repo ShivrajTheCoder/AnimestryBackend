@@ -2,6 +2,8 @@ const express = require("express");
 const { body, check } = require("express-validator");
 const { addToCart, removeFromCart, getUserCart } = require("../Controllers/cartController");
 const router = express.Router();
+const authenticateToken = require("../Middlewares/UserAuthMiddleware");
+const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
 
 router.route("/addtocart").post(authenticateToken,[
     body("userId").exists().isMongoId(),

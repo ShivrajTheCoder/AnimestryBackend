@@ -11,9 +11,11 @@ const {
 const mongoose = require("mongoose");
 
 const cartProductSchema = require('../Models/cartProductSchema');
+const authenticateToken = require("../Middlewares/UserAuthMiddleware");
+const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
 
 
-router.get("/getallorders", authenticateToken, getAllOrders);
+router.get("/getallorders", adminAuthenticateToken, getAllOrders);
 
 router.delete("/cancelorder/:orderId", authenticateToken, [
   check("orderId").exists().isMongoId(),

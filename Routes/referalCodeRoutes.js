@@ -3,6 +3,9 @@ const { body, check } = require("express-validator");
 const { getCodeById, deactivateCode, addCode, getAllCode, applyCode } = require("../Controllers/referalCodeConroller");
 const router = express.Router();
 
+const authenticateToken = require("../Middlewares/UserAuthMiddleware");
+const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
+
 router.route("/addcode")
     .post(adminAuthenticateToken,[
         body("code").exists(),

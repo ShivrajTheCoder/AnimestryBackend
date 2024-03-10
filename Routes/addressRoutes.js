@@ -2,6 +2,7 @@ const express = require("express");
 const { check, validationResult, body } = require("express-validator");
 const router = express.Router(); // Import the router object
 const { addAddress, getAllUserAddress, getAddressById, removeAddress, updateAddress } = require("../Controllers/addressController")
+const authenticateToken = require("../Middlewares/UserAuthMiddleware");
 
 
 router.route("/saveaddress/:userId")

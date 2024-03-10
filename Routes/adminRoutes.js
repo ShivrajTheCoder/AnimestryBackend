@@ -2,6 +2,8 @@ const express=require("express");
 const router=express.Router();
 const {Dashboardinfo, MarkAsDeliverd, Signup, Login} =require("../Controllers/adminController");
 const { check } = require("express-validator");
+const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
+
 router.route("/dashinfo")
     .get(adminAuthenticateToken,Dashboardinfo)
 

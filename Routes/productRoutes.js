@@ -6,6 +6,7 @@ const router = express.Router();
 const multer = require('multer');
 const { uploadImages, uploadImage } = require("../Utilities/aws/S3");
 const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/') // Uploads folder where files will be stored
