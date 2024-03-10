@@ -13,13 +13,13 @@ const mongoose = require("mongoose");
 const cartProductSchema = require('../Models/cartProductSchema');
 
 
-router.get("/getallorders", getAllOrders);
+router.get("/getallorders", authenticateToken, getAllOrders);
 
-router.delete("/cancelorder/:orderId", [
+router.delete("/cancelorder/:orderId", authenticateToken, [
   check("orderId").exists().isMongoId(),
 ], cancelOrder);
 
-router.get("/alluserorders/:userId", [
+router.get("/alluserorders/:userId", authenticateToken, [
   check("userId").exists().isMongoId(),
 ], getAllUserOrders);
 
@@ -29,6 +29,7 @@ router.get("/alluserorders/:userId", [
 
 router.post(
   '/createorder',
+  authenticateToken,
   [
     body('address').exists().isMongoId(),
     body('userId').exists().isMongoId(),
@@ -57,9 +58,10 @@ router.post(
 );
 
 router.post("/paymentsuccess",
-  [ body("rzId").exists(),
-    body("userId").exists().isMongoId(),
-    body("orderId").exists().isMongoId(),
+  authenticateToken,
+  [body("rzId").exists(),
+  body("userId").exists().isMongoId(),
+  body("orderId").exists().isMongoId(),
   ],
   markAsPayed
 )

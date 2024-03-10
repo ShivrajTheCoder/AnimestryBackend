@@ -1,10 +1,11 @@
 const express=require("express");
 const { body, check } = require("express-validator");
 const { deleteReview, getProductReview, addReview } = require("../Controllers/reviewController");
+const authenticateToken = require("../Middlewares/UserAuthMiddleware");
 const router=express.Router();
 
 router.route("/addreview")
-    .post([
+    .post(authenticateToken,[
         body("description").exists(),
         body("productId").exists(),
         body("userId").exists(),
@@ -12,7 +13,7 @@ router.route("/addreview")
     ],addReview);
 
 router.route("/deletereview/:reviewId")
-    .delete([
+    .delete(authenticateToken,[
         check("reviewId").exists().isMongoId()
     ],deleteReview);
 

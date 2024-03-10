@@ -5,6 +5,7 @@ const { CustomError } = require("../Utilities/CustomErrors");
 const router = express.Router();
 const multer = require('multer');
 const { uploadImages, uploadImage } = require("../Utilities/aws/S3");
+const adminAuthenticateToken = require("../Middlewares/AdminAuthMiddleware");
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/') // Uploads folder where files will be stored
@@ -37,7 +38,7 @@ const atLeastOne = (value, { req }) => {
 };
 
 router.route("/updateprod/:prodId")
-    .put([
+    .put(adminAuthenticateToken,[
         body("name").optional(),
         body("anime").optional(),
         body("category").optional().isMongoId(),
@@ -47,15 +48,15 @@ router.route("/updateprod/:prodId")
         body().custom(atLeastOne),
     ], UpdateProduct);
 
-router.route("/addproduct").post(multipleUpload, AddProduct);
+router.route("/addproduct").post(adminAuthenticateToken,multipleUpload, AddProduct);
 
-router.route("/addnewcategory").post(AddNewCategory);
+router.route("/addnewcategory").post(adminAuthenticateToken,AddNewCategory);
 
 router.route("/getallcategories")
     .get(GetAllCategories)
 
 router.route("/deleteproduct/:productId")
-    .delete([
+    .delete(adminAuthenticateToken,[
         check("productId").exists().isMongoId()
     ], DeleteProduct)
 
@@ -67,7 +68,7 @@ router.route("/search")
     ], SearchProducts)
 
 router.route("/adddiscount/:productId")
-    .post([
+    .post(adminAuthenticateToken,[
         body("discount").exists().isNumeric(),
         check("productId").exists().isMongoId()
     ], AddDiscount)

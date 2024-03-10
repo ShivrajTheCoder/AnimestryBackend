@@ -5,7 +5,7 @@ const { addAddress, getAllUserAddress, getAddressById, removeAddress, updateAddr
 
 
 router.route("/saveaddress/:userId")
-    .post([
+    .post(authenticateToken,[
         check("userId").exists().isMongoId(),
         body('firstname').notEmpty().isString(),
         body('lastname').notEmpty().isString(),
@@ -17,22 +17,22 @@ router.route("/saveaddress/:userId")
     ], addAddress);
 
 router.route("/getalluseraddress/:userId")
-    .get([
+    .get(authenticateToken,[
         check("userId").exists().isMongoId(),
     ], getAllUserAddress);
 
 router.route("/getaddressbyid/:addId")
-    .get([
+    .get(authenticateToken,[
         check("addId").exists().isMongoId(),
     ], getAddressById);
 
 router.route("/removeaddress/:addId")
-    .delete([
+    .delete(authenticateToken,[
         check("addId").exists().isMongoId(),
     ], removeAddress);
 
 router.route("/updateadd/:addId")
-    .put([
+    .put(authenticateToken,[
         check("addId").exists().isMongoId(),
         body().custom((value, { req }) => {
             // Check if any of the fields are present in the request body

@@ -3,7 +3,7 @@ const router=express.Router();
 const {Dashboardinfo, MarkAsDeliverd, Signup, Login} =require("../Controllers/adminController");
 const { check } = require("express-validator");
 router.route("/dashinfo")
-    .get(Dashboardinfo)
+    .get(adminAuthenticateToken,Dashboardinfo)
 
 router.route("/login")
     .post([
@@ -19,7 +19,7 @@ router.route("/signup")
     ],Signup)
 
 router.route("/markasdelivered/:orderId")
-    .put([
+    .put(adminAuthenticateToken,[
         check("orderId").exists().isMongoId(),
     ],MarkAsDeliverd)
 

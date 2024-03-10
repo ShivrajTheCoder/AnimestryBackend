@@ -22,6 +22,7 @@ const validate = (validations) => {
 };
 
 router.post('/addnewotherproduct',
+    adminAuthenticateToken,
     multipleUpload,
     addOtherProduct
 );
@@ -34,7 +35,7 @@ router.get('/getotherproductbyid/:id',
 );
 
 router.put('/updateotherprouct/:id',
-    validate([
+    validate(adminAuthenticateToken,[
         param('id').notEmpty().isMongoId(),
         body('name').optional(),
         body('anime').optional(),
@@ -45,7 +46,7 @@ router.put('/updateotherprouct/:id',
 );
 
 router.delete('/deleteotherproduct/:id',
-    validate([
+    validate(adminAuthenticateToken,[
         param('id').notEmpty().isMongoId()
     ]),
     deleteOtherProduct

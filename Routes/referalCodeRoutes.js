@@ -4,7 +4,7 @@ const { getCodeById, deactivateCode, addCode, getAllCode, applyCode } = require(
 const router = express.Router();
 
 router.route("/addcode")
-    .post([
+    .post(adminAuthenticateToken,[
         body("code").exists(),
         body("discount").exists().isNumeric(),
     ], addCode)
@@ -21,7 +21,7 @@ router.route("/:codeId")
     ], deactivateCode)
 
 router.route("/apply")
-    .post([
+    .post(authenticateToken,[
         body("code").exists().isString(),
     ],applyCode)
 
