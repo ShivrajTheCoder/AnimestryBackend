@@ -79,11 +79,9 @@ exp.removeFromCart = RouterAsncErrorHandler(async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { productId } = req.params;
-    // console.log(req.body)
-    const {other,complete}=req.body;
+    const {other,complete,productId,userId}=req.body;
     console.log(req.body,req.params);
-    const userId = '65c114022931680e9a1531ed';
+    // const userId = '65c114022931680e9a1531ed';
     // console.log(productId,other)
     try {
         let product=null;

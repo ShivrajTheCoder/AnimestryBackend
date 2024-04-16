@@ -4,8 +4,9 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../Utilities/sendMail");
 const generateVerificationCode = require("../Utilities/generateCode");
 const Code = require("../Models/Code");
-const User=require("../Models/UserModel");
+const User = require("../Models/UserModel");
 const { validationResult } = require("express-validator");
+const { NotFoundError } = require("../Utilities/CustomErrors");
 dotenv.config();
 const exp = module.exports;
 const USER_KEY = process.env.JWT_SECRET_KEY;
@@ -53,7 +54,7 @@ exp.SendCode = async (req, res, next) => {
             return res.status(500).json({ message: 'Error sending verification code.' });
         }
         // console.log(savedCode);
-        res.status(201).json({ message: 'Verification code sent. with code',  });// remove code 
+        res.status(201).json({ message: 'Verification code sent. with code', });// remove code 
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Error sending verification code.' });
@@ -148,13 +149,66 @@ exp.ForgotPassword = async (req, res, next) => {
             return res.status(500).json({ message: 'Error sending verification code.' });
         }
         return res.status(201).json({
-            message:"New password sent on mail"
+            message: "New password sent on mail"
         })
     } catch (error) {
         return res.status(500).json({
             message: "Something went wrong!",
             error
         })
+    }
+}
+
+exp.GetUserInfor = async (req, res, next) => {
+    const { userId } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new NotFoundError("User not found!");
+        }
+        return res.status(200).json({ user });
+    }
+    catch (error) {
+        next(error);
+    }
+
+}
+
+exp.UpdatePassword = async (req, res, next) => {
+    const { userId } = req.params;
+    const { password, newpassword } = req.body;
+    const errors = validationResult(req);
+    // console.log(errors);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    try {
+        // Find the user by userId
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new NotFoundError("User not found!");
+        }
+
+        // Compare the provided password with the hashed password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        // console.log(passwordMatch);
+        if (!passwordMatch) {
+            return res.status(401).json({ message: "Incorrect password." });
+        }
+
+        // Hash the new password
+        const hashedNewPassword = await bcrypt.hash(newpassword, saltRounds);
+
+        // Update the user's password
+        const updatedUser = await User.findByIdAndUpdate(userId, { password: hashedNewPassword }, { new: true });
+
+        return res.status(200).json({ user: updatedUser });
+    } catch (error) {
+        next(error);
     }
 }
 

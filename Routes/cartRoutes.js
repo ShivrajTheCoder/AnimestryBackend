@@ -14,10 +14,12 @@ router.route("/addtocart").post(authenticateToken,[
     body("other").optional().isBoolean()
 ], addToCart);
 
-router.route("/removefromcart/:productId").post(authenticateToken,[
+router.route("/removefromcart").post(authenticateToken,[
     check("productId").exists().isMongoId(),
     body("other").optional().isBoolean(),
     body("complete").optional().isBoolean(),
+    body("productId").exists().isMongoId(),
+    body("userId").exists().isMongoId(),
 ], removeFromCart);
 
 router.route("/getusercart/:userId").get(authenticateToken,[
