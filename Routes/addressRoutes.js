@@ -23,7 +23,7 @@ router.route("/getalluseraddress/:userId")
     ], getAllUserAddress);
 
 router.route("/getaddressbyid/:addId")
-    .get(authenticateToken,[
+    .get([
         check("addId").exists().isMongoId(),
     ], getAddressById);
 
