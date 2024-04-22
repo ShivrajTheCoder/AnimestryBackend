@@ -64,8 +64,10 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
       const order = await new Promise((resolve, reject) => {
         instance.orders.create(options, function (err, order) {
           if (err) {
+            console.log(err);
             reject(new Error("Something went wrong with Razorpay!"));
           } else {
+            console.log(order);
             resolve(order);
           }
         });
@@ -91,6 +93,7 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
       order: savedOrder
     });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 });
