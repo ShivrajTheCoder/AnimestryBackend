@@ -11,7 +11,6 @@ const s3 = new S3({
   access_key,
   secret_key
 })
-console.log("s3 credentials", s3,region,access_key,secret_key)
 // upload
 
 function uploadImage(file, name) {
