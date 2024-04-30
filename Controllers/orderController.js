@@ -51,7 +51,7 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
 
     const taxPercentage = 0.1; // 10% tax rate
     const taxAmount = totalAmount * taxPercentage;
-    const totalAmountWithTax = totalAmount + taxAmount;
+    const totalAmountWithTax = Math.round(totalAmount + taxAmount) ;
 
     const options = {
       amount: totalAmountWithTax * 100,
@@ -80,7 +80,7 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
     // Save the order
     const newOrder = new Order({
       products,
-      amount: (options.amount / 100),
+      amount: Math.round((options.amount / 100)),
       userId,
       address: savedAddress,
       rzId: rz_orderId,

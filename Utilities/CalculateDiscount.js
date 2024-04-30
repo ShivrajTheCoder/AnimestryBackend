@@ -22,9 +22,9 @@ function calculateTotalAmount(productData, otherProductData, products, codedisco
 
     if (codediscount) {
         totalCodeDis = totalAmountWithoutDiscount - (totalAmountWithoutDiscount * codediscount / 100);
-        totalAmount = Math.min(totalCodeDis, totalAmountWithDiscount);
+        totalAmount = Math.round(Math.min(totalCodeDis, totalAmountWithDiscount));
     } else {
-        totalAmount = totalAmountWithDiscount;
+        totalAmount = Math.round(totalAmountWithDiscount);
     }
 
     return totalAmount;
