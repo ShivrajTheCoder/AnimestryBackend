@@ -28,43 +28,36 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
   let codediscount = null;
   let referalCode = null;
   if (codeId) {
-    referalCode = await Code.findOne({ _id:codeId, isActive: true });
+    referalCode = await Code.findOne({ _id: codeId, isActive: true });
     if (referalCode) {
-      codediscount = referalCode.discount; // discount in percentage
+      codediscount = referalCode.discount;
     }
   }
+
   const savedAddress = address;
-  // console.log(req.body,referalCode,codediscount);
+
   try {
-    // Separate products by model type
     const productIds = products.map(p => p.productId);
     const productData = await Product.find({ _id: { $in: productIds } });
     const otherProductData = await OtherProduct.find({ _id: { $in: productIds } });
 
-    // Check if all products are valid
     if (productData.length + otherProductData.length !== products.length) {
       throw new CustomError(400, "Some products are invalid", "Invalid");
     }
 
-    // Calculate total amount using the calculateTotalAmount function
     const totalAmount = calculateTotalAmount(productData, otherProductData, products, codediscount);
 
-    const taxPercentage = 0.1; // 10% tax rate
-    const taxAmount = totalAmount * taxPercentage;
-    const totalAmountWithTax = Math.round(totalAmount + taxAmount) ;
-
     const options = {
-      amount: totalAmountWithTax * 100,
+      amount: Math.round(totalAmount * 100),
       currency: "INR"
     };
 
-    // Create a new order with Razorpay
     let rz_orderId = "";
     try {
       const order = await new Promise((resolve, reject) => {
         instance.orders.create(options, function (err, order) {
           if (err) {
-            console.log(err);
+            console.log(err, " i am the main error");
             reject(new Error("Something went wrong with Razorpay!"));
           } else {
             console.log(order);
@@ -74,17 +67,17 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
       });
       rz_orderId = order.id;
     } catch (err) {
+      console.log("here is the errror" + err);
       throw new CustomError(500, err.message, "Razorpay Error");
     }
 
-    // Save the order
     const newOrder = new Order({
       products,
-      amount: Math.round((options.amount / 100)),
+      amount: Math.round(options.amount / 100),
       userId,
       address: savedAddress,
       rzId: rz_orderId,
-      codeId: codeId ? codeId : null // Save the codeId if exists, otherwise save null
+      codeId: codeId ? codeId : null
     });
     const savedOrder = await newOrder.save();
 
@@ -97,8 +90,6 @@ exp.createRzOrder = RouterAsncErrorHandler(async (req, res, next) => {
     next(error);
   }
 });
-
-
 
 
 exp.markAsPayed = RouterAsncErrorHandler(async (req, res, next) => {
